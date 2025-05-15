@@ -1,0 +1,39 @@
+.wrapper {
+  background: rgba(233, 232, 248, 1);
+}
+
+.sidebar {
+  border-right: 1px solid rgba(221, 220, 237, 1);
+  background: white;
+}
+
+.report_icon_box {
+  background: rgba(234, 241, 255, 1);
+}
+
+.selected_border {
+  border: 1px solid rgba(0, 0, 255, 1);
+}
+
+.unselected_border {
+  border: 1px solid rgba(237, 237, 237, 1);
+}
+
+.custom_scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom_scrollbar::-webkit-scrollbar-thumb {
+  background-color: #4A90E2;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.custom_scrollbar::-webkit-scrollbar-track {
+  background-color: #F0F0F0;
+}
+
+.custom_scrollbar::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+

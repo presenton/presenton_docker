@@ -1,0 +1,334 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import '../app/(presentation-generator)/styles/themes.css';
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 10% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+  }
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+strong{
+  @apply font-black ;
+}
+::selection {
+  background-color: hsl(var(--chart-1));
+  color: white;
+}
+
+/* Hide input number arrows */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+thead, tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;/* even columns width , fix width of table too*/
+}
+thead {
+    width: calc( 100% - 1em )/* scrollbar is average 1em/16px width, remove it from thead width */
+}
+
+/* Add this to your global CSS or a specific CSS module */
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.typing-effect {
+  overflow: hidden; /* Ensures the text is hidden until revealed */
+  white-space: nowrap; /* Prevents text from wrapping */
+  display: inline-block; /* Ensures the width is respected */
+  animation: typing 2s steps(10, end); /* Adjust duration and steps for effect */
+  animation-fill-mode: forwards; /* Retain the final state of the animation */
+  animation-delay: 1s; /* Optional: delay before starting the animation */
+}
+
+.typing-effect-complete {
+  border-right: none; /* Remove the cursor after animation */
+}
+.blinking-cursor {
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    from, to { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  @apply hidden;
+}
+.hide-scrollbar {
+    -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+
+.custom_scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom_scrollbar::-webkit-scrollbar-thumb {
+  background-color: #4A90E2;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.custom_scrollbar::-webkit-scrollbar-track {
+  background-color: #F0F0F0;
+}
+
+.custom_scrollbar::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+
+/* word animation */
+
+@keyframes slideUp {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(-50%);
+    }
+}
+
+@keyframes slideDown {
+    0% {
+        transform: translateY(-50%);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.animate-slideUp {
+    animation: slideUp 20s linear infinite;
+}
+
+.animate-slideDown {
+    animation: slideDown 20s linear infinite;
+}
+
+/* Add hover pause */
+.animate-slideUp:hover,
+.animate-slideDown:hover {
+    animation-play-state: paused;
+}
+/*  box animation */
+
+.research-mode-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.research-mode-bg::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(56, 48, 161, 0.1) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  animation: rippleEffect 0.6s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes rippleEffect {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0.8;
+  }
+  100% {
+    width: 200%;
+    height: 200%;
+    opacity: 1;
+  }
+}
+/* Markdown Styles */
+.markdown-content {
+  @apply prose prose-slate max-w-none;
+}
+
+.markdown-content h1 {
+  @apply text-3xl font-bold mb-6 text-gray-900;
+}
+
+.markdown-content h2 {
+  @apply text-2xl font-bold mb-4 text-gray-900;
+}
+
+.markdown-content h3 {
+  @apply text-xl font-bold mb-3 text-gray-900;
+}
+
+.markdown-content p {
+  @apply mb-4 text-base text-gray-700;
+}
+
+.markdown-content ul {
+  @apply list-disc pl-6 mb-4;
+}
+
+.markdown-content ol {
+  @apply list-decimal pl-6 mb-4;
+}
+
+.markdown-content li {
+  @apply mb-1;
+}
+
+.markdown-content strong,
+.markdown-content b {
+  @apply font-bold text-gray-900;
+}
+
+.markdown-content em {
+  @apply italic;
+}
+
+.markdown-content blockquote {
+  @apply border-l-4 border-gray-300 pl-4 italic my-4;
+}
+
+.markdown-content code {
+  @apply bg-gray-100 px-1 py-0.5 rounded font-mono text-sm;
+}
+
+.markdown-content pre {
+  @apply bg-gray-100 p-4 rounded-lg my-4 overflow-x-auto;
+}
+
+.markdown-content a {
+  @apply text-blue-600 hover:text-blue-800 underline;
+}
+
+.markdown-content table {
+  @apply min-w-full border border-gray-300 my-4;
+}
+
+.markdown-content th {
+  @apply bg-gray-100 border border-gray-300 px-4 py-2 font-bold;
+}
+
+.markdown-content td {
+  @apply border border-gray-300 px-4 py-2;
+}
+
+/* MDXEditor styles */
+.mdxeditor-toolbar-group {
+  @apply flex items-center gap-1 p-1;
+}
+
+.mdxeditor-toolbar {
+  @apply flex items-center gap-2 p-2 border-b;
+}
+
+.mdxeditor-button {
+  @apply p-1 rounded hover:bg-gray-100 transition-colors;
+}
+
+.mdxeditor-button[data-active=true] {
+  @apply bg-gray-100;
+} 
+
+/* tippy-box  */
+.tippy-box {
+  max-width: 100% !important;
+}
+
+.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+
+
+

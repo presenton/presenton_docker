@@ -1,0 +1,145 @@
+/* Light Theme */
+.slide-theme[data-theme="light"] {
+  --slide-bg: var(--light-slide-bg);
+  --slide-title: var(--light-slide-title);
+  --slide-heading: var(--light-slide-heading);
+  --slide-description: var(--light-slide-description);
+  --slide-box: var(--light-slide-box);
+}
+
+/* Dark Theme */
+.slide-theme[data-theme="dark"] {
+  --slide-bg: var(--dark-slide-bg);
+  --slide-title: var(--dark-slide-title);
+  --slide-heading: var(--dark-slide-heading);
+  --slide-description: var(--dark-slide-description);
+  --slide-box: var(--dark-slide-box);
+}
+
+/* Classic Theme */
+.slide-theme[data-theme="faint_yellow"] {
+  --slide-bg: var(--faint_yellow-slide-bg);
+  --slide-title: var(--faint_yellow-slide-title);
+  --slide-heading: var(--faint_yellow-slide-heading);
+  --slide-description: var(--faint_yellow-slide-description);
+  --slide-box: var(--faint_yellow-slide-box);
+}
+
+/* Custom Theme */
+.slide-theme[data-theme="custom"] {
+  --slide-bg: var(--custom-slide-bg);
+  --slide-title: var(--custom-slide-title);
+  --slide-heading: var(--custom-slide-heading);
+  --slide-description: var(--custom-slide-description);
+  --slide-box: var(--custom-slide-box);
+}
+
+/* Royal Blue Theme */
+.slide-theme[data-theme="royal_blue"] {
+  --slide-bg: var(--royal_blue-slide-bg);
+  --slide-title: var(--royal_blue-slide-title);
+  --slide-heading: var(--royal_blue-slide-heading);
+  --slide-description: var(--royal_blue-slide-description);
+  --slide-box: var(--royal_blue-slide-box);
+}
+
+/* Light Red Theme */
+.slide-theme[data-theme="light_red"] {
+  --slide-bg: var(--light_red-slide-bg);
+  --slide-title: var(--light_red-slide-title);
+  --slide-heading: var(--light_red-slide-heading);
+  --slide-description: var(--light_red-slide-description);
+  --slide-box: var(--light_red-slide-box);
+}
+
+/* Dark Pink Theme */
+.slide-theme[data-theme="dark_pink"] {
+  --slide-bg: var(--dark_pink-slide-bg);
+  --slide-title: var(--dark_pink-slide-title);
+  --slide-heading: var(--dark_pink-slide-heading);
+  --slide-description: var(--dark_pink-slide-description);
+  --slide-box: var(--dark_pink-slide-box);
+}
+
+/* Cream Theme */
+.slide-theme[data-theme="cream"] {
+  --slide-bg: var(--cream-slide-bg);
+  --slide-title: var(--cream-slide-title);
+  --slide-heading: var(--cream-slide-heading);
+  --slide-description: var(--cream-slide-description);
+  --slide-box: var(--cream-slide-box);
+}
+
+
+/* Apply theme styles - Make sure these selectors are more specific */
+.slide-theme .slide-container {
+  background-color: var(--slide-bg);
+
+}
+
+
+.slide-theme .slide-title {
+  color: var(--slide-title);
+}
+
+.slide-theme .slide-heading {
+  color: var(--slide-heading);
+}
+
+.slide-theme .slide-description {
+  color: var(--slide-description);
+}
+
+.slide-theme .slide-box {
+  background-color: var(--slide-box);
+}
+
+/* Add to your existing CSS */
+.slide-theme {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+
+
+@keyframes progress {
+    0% { width: 5%; }
+    20% { width: 25%; }
+    50% { width: 45%; }
+    75% { width: 75%; }
+    90% { width: 85%; }
+    100% { width: 90%; }
+}
+
+@keyframes fade-in {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.animate-progress {
+    animation: progress 20s ease-out forwards;
+}
+
+.animate-fade-in {
+    animation: fade-in 0.5s ease-out forwards;
+}
+
+@keyframes border-dance {
+  0% {
+    background-position: 0 0, 100% 0, 100% 100%, 0 100%;
+  }
+  100% {
+    background-position: 100% 0, 100% 100%, 0 100%, 0 0;
+  }
+}
+
+.animate-border {
+  background-image: 
+    linear-gradient(90deg, #5141e5 50%, transparent 50%),   /* top */
+    linear-gradient(90deg, #5141e5 50%, transparent 50%),   /* right */
+    linear-gradient(90deg, #5141e5 50%, transparent 50%),   /* bottom */
+    linear-gradient(90deg, #5141e5 50%, transparent 50%);   /* left */
+  background-repeat: repeat-x, repeat-y, repeat-x, repeat-y;
+  background-size: 15px 2px, 2px 15px, 15px 2px, 2px 15px;
+  background-position: 0 0, 100% 0, 100% 100%, 0 100%;
+  animation: border-dance 6s infinite linear;
+}
