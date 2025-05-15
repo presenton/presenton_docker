@@ -1,4 +1,4 @@
-> Note: Presenton Docker is currently on development.
+> **Note: Presenton Docker is currently on development.**
 
 <p align="center">
   <img src="readme_assets/images/logo.png" width="240" height="100" alt="Alt text" />

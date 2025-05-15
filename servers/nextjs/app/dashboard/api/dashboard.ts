@@ -4,8 +4,11 @@ import {
 } from "@/app/(presentation-generator)/services/api/header";
 import { getEnv } from "@/utils/constant";
 
+
 const urls = getEnv();
 const BASE_URL = urls.BASE_URL;
+
+
 export interface PresentationResponse {
   id: string;
   title: string;
@@ -24,7 +27,7 @@ export interface PresentationResponse {
 }
 
 export class DashboardApi {
- 
+
   static async getPresentations(): Promise<PresentationResponse[]> {
     try {
       const response = await fetch(
@@ -52,7 +55,7 @@ export class DashboardApi {
         `${BASE_URL}/ppt/presentation?presentation_id=${id}`,
         {
           method: "GET",
-         
+
         }
       );
       if (response.status === 200) {

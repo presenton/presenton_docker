@@ -29,8 +29,6 @@ import { AlertCircle } from "lucide-react";
 import Help from "./Help";
 import { getEnv } from "@/utils/constant";
 
-const urls = getEnv();
-const BASE_URL = urls.BASE_URL;
 
 // Custom debounce function
 function useDebounce<T extends (...args: any[]) => void>(
