@@ -29,9 +29,12 @@ export const useFooterService = () => {
   const getFooterProperties = useCallback(
     async (): Promise<FooterProperties | null> => {
       try {
-        // @ts-ignore
-        const result = await window.electron.getFooter();
-        return result.properties;
+        const response = await fetch('/api/footer');
+        if (!response.ok) {
+          throw new Error('Failed to fetch footer properties');
+        }
+        const data = await response.json();
+        return data.properties;
       } catch (error) {
         console.error("Error retrieving footer properties:", error);
         return null;
@@ -44,8 +47,19 @@ export const useFooterService = () => {
   const saveFooterProperties = useCallback(
     async (properties: FooterProperties): Promise<boolean> => {
       try {
-        // @ts-ignore
-        const result = await window.electron.setFooter(properties);
+        const response = await fetch('/api/footer', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ properties }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to save footer properties');
+        }
+
+        const result = await response.json();
         return result.success;
       } catch (error) {
         console.error("Error saving footer properties:", error);

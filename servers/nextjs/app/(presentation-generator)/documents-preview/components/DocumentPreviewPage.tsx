@@ -82,6 +82,14 @@ const DocumentsPreviewPage: React.FC = () => {
   };
 
 
+  const readFile = async (filePath: string) => {
+    const res = await fetch(`/api/read-file`, {
+      method: "POST",
+      body: JSON.stringify({ filePath }),
+    });
+    return res.json();
+  }
+
   const maintainDocumentTexts = async () => {
     const newDocuments: string[] = [];
     const promises: Promise<string>[] = [];
@@ -91,7 +99,7 @@ const DocumentsPreviewPage: React.FC = () => {
       if (!(key in textContents)) {
         newDocuments.push(key);
         // @ts-ignore
-        promises.push(window.electron.readFile(documents[key]));
+        promises.push(readFile(documents[key]));
       }
     });
 

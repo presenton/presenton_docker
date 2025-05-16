@@ -1,4 +1,4 @@
-// app/api/footer/route.ts
+
 import { settingsStore } from "@/app/(presentation-generator)/services/setting-store";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -6,13 +6,20 @@ const FOOTER_KEY = 'footer';
 // GET handler to retrieve properties
 export async function GET(request: NextRequest) {
   try {
-      const properties = settingsStore.get(FOOTER_KEY);
+    const properties = settingsStore.get(FOOTER_KEY);
     
-      return { properties };
-    } catch (error) {
-      console.error('Error retrieving footer properties:', error);
-      throw error;
+    if (!properties) {
+      return NextResponse.json({ properties: null });
     }
+
+    return NextResponse.json({ properties });
+  } catch (error) {
+    console.error('Error retrieving footer properties:', error);
+    return NextResponse.json(
+      { error: 'Failed to retrieve footer properties' },
+      { status: 500 }
+    );
+  }
 }
 
 
@@ -23,12 +30,31 @@ export async function POST(request: NextRequest) {
     const { properties } = body;
 
     if (!properties) {
-      throw new Error('Properties are required');
+      return NextResponse.json(
+        { error: 'Properties are required' },
+        { status: 400 }
+      );
     }
-      settingsStore.set(FOOTER_KEY, properties);
-      return { success: true };
-    } catch (error) {
-      console.error('Error saving footer properties:', error);
-      throw error;
+
+    // Validate required properties
+    if (!properties.logoProperties || !properties.footerMessage) {
+      return NextResponse.json(
+        { error: 'Invalid footer properties structure' },
+        { status: 400 }
+      );
     }
+
+    settingsStore.set(FOOTER_KEY, properties);
+    
+    return NextResponse.json({ 
+      success: true,
+      properties 
+    });
+  } catch (error) {
+    console.error('Error saving footer properties:', error);
+    return NextResponse.json(
+      { error: 'Failed to save footer properties' },
+      { status: 500 }
+    );
+  }
 }

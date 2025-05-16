@@ -256,15 +256,22 @@ const ImageEditor = ({
       setIsUploading(true);
       setUploadError(null);
 
-      // Convert file to buffer
-      const buffer = await file.arrayBuffer();
+      const formData = new FormData();
+      formData.append('file', file);
 
-      // Send to electron main process
-      // @ts-ignore
-      const relativePath = await window.electron.uploadImage(Buffer.from(buffer));
+      const response = await fetch('/api/upload-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Upload failed');
+      }
 
       // Update state with the returned path
-      setUploadedImageUrl(relativePath);
+      setUploadedImageUrl(result.filePath);
     } catch (err) {
       const error_message = "Failed to upload image. Please try again.";
 

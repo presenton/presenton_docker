@@ -20,9 +20,12 @@ export const useThemeService = () => {
     colors: ThemeColors;
   } | null> => {
     try {
-      // @ts-ignore
-      const result = await window.electron.getTheme();
-      return result.theme;
+      const response = await fetch('/api/theme');
+      if (!response.ok) {
+        throw new Error('Failed to fetch theme');
+      }
+      const data = await response.json();
+      return data.theme;
     } catch (error) {
       console.error("Error retrieving theme:", error);
       return null;
@@ -35,8 +38,19 @@ export const useThemeService = () => {
       colors: ThemeColors;
     }): Promise<boolean> => {
       try {
-        // @ts-ignore
-        const result = await window.electron.setTheme(themeData);
+        const response = await fetch('/api/theme', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ themeData }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to save theme');
+        }
+
+        const result = await response.json();
         return result.success;
       } catch (error) {
         console.error("Error saving theme:", error);

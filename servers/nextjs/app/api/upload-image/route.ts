@@ -4,8 +4,7 @@ import fs from "fs";
 import crypto from "crypto";
 import os from "os";
 
-// Use OS temp directory as a base for uploads
-const userDataDir = os.tmpdir();
+const userDataDir = process.env.USER_DATA_DIR || '/temp';
 
 export async function POST(request: NextRequest) {
   try {
