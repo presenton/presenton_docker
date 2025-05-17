@@ -20,12 +20,20 @@ def get_presentation_dir(presentation_id: str) -> str:
     return presentation_dir
 
 
+def get_presentation_images_dir(presentation_id: str) -> str:
+    presentation_images_dir = os.path.join(
+        get_presentation_dir(presentation_id), "images"
+    )
+    os.makedirs(presentation_images_dir, exist_ok=True)
+    return presentation_images_dir
+
+
 def get_user_config():
     user_config_path = os.getenv("USER_CONFIG_PATH")
 
     existing_config = UserConfig()
     try:
-        if user_config_path and os.path.exists(user_config_path):
+        if os.path.exists(user_config_path):
             with open(user_config_path, "r") as f:
                 existing_config = UserConfig(**json.load(f))
     except Exception as e:
@@ -144,14 +152,14 @@ async def handle_errors(
 
 def sanitize_filename(filename: str) -> str:
     name, ext = os.path.splitext(filename)
-    sanitized = re.sub(r'[\\/:*?"<>|]', '_', name)
-    sanitized = re.sub(r'[\s_]+', '_', sanitized)
-    sanitized = sanitized.strip(' .')
+    sanitized = re.sub(r'[\\/:*?"<>|]', "_", name)
+    sanitized = re.sub(r"[\s_]+", "_", sanitized)
+    sanitized = sanitized.strip(" .")
 
     if not sanitized:
-        sanitized = 'untitled'
-    
+        sanitized = "untitled"
+
     if len(sanitized) > 200:
         sanitized = sanitized[:200]
-    
+
     return sanitized + ext

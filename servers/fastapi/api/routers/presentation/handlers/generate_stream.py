@@ -1,14 +1,12 @@
 import asyncio
 import json
-import os
 from typing import List
-import uuid
 
 from fastapi import HTTPException
 from fastapi.responses import StreamingResponse
-from sqlmodel import delete, select
+from sqlmodel import delete
 
-from api.models import LogMetadata, SSEResponse
+from api.models import LogMetadata, SSECompleteResponse, SSEResponse, SSEStatusResponse
 
 from api.routers.presentation.models import (
     PresentationAndSlides,
@@ -17,7 +15,7 @@ from api.routers.presentation.models import (
 from api.services.database import get_sql_session
 from api.services.logging import LoggingService
 from api.sql_models import KeyValueSqlModel, PresentationSqlModel, SlideSqlModel
-from api.utils import get_presentation_dir
+from api.utils import get_presentation_dir, get_presentation_images_dir
 from image_processor.icons_vectorstore_utils import get_icons_vectorstore
 from image_processor.images_finder import generate_image
 from image_processor.icons_finder import get_icon
@@ -119,39 +117,14 @@ class PresentationGenerateStreamHandler:
             content["index"] = i
             content["presentation"] = presentation.id
             slide_model = SlideModel(**content)
-            slide_content = slide_model.content
-            has_images = hasattr(slide_content, "image_prompts")
-            has_icons = hasattr(slide_content, "icon_queries")
-
-            if has_images:
-                slide_model.images = [
-                    os.path.join(
-                        self.presentation_dir,
-                        "images",
-                        f"{str(uuid.uuid4())}.jpg",
-                    )
-                    for _ in range(len(slide_content.image_prompts))
-                ]
-
-            if has_icons:
-                slide_model.icons = [
-                    os.path.join(
-                        self.presentation_dir,
-                        "icons",
-                        f"{str(uuid.uuid4())}.png",
-                    )
-                    for _ in range(len(slide_content.icon_queries))
-                ]
-
             slide_models.append(slide_model)
-
-        yield SSEResponse(
-            event="response",
-            data=json.dumps({"type": "status", "status": "Fetching slide assets"}),
-        ).to_string()
 
         async for result in self.fetch_slide_assets(slide_models):
             yield result
+
+        print("-" * 40)
+        print(slide_models)
+        print("-" * 40)
 
         slide_sql_models = [
             SlideSqlModel(**each.model_dump(mode="json")) for each in slide_models
@@ -163,73 +136,55 @@ class PresentationGenerateStreamHandler:
             for each in slide_sql_models:
                 sql_session.refresh(each)
 
-        yield SSEResponse(
-            event="response",
-            data=json.dumps({"type": "status", "status": "Packing slide data"}),
-        ).to_string()
+        yield SSEStatusResponse(status="Packing slide data").to_string()
 
         response = PresentationAndSlides(
             presentation=presentation, slides=slide_sql_models
         ).to_response_dict()
 
-        yield SSEResponse(
-            event="response",
-            data=json.dumps({"type": "complete", "presentation": response}),
-        ).to_string()
-        yield SSEResponse(
-            event="response",
-            data=json.dumps({"type": "closing", "content": "First Warning"}),
-        ).to_string()
-        await asyncio.sleep(3)
-        yield SSEResponse(
-            event="response",
-            data=json.dumps({"type": "closing", "content": "Final Warning"}),
-        ).to_string()
+        yield SSECompleteResponse(key="presentation", value=response).to_string()
 
     async def fetch_slide_assets(self, slide_models: List[SlideModel]):
         image_prompts = []
         icon_queries = []
 
-        image_paths = []
-        icon_paths = []
-
         for each_slide_model in slide_models:
             slide_model_utils = SlideModelUtils(self.theme, each_slide_model)
+            image_prompts.extend(slide_model_utils.get_image_prompts())
+            icon_queries.extend(slide_model_utils.get_icon_queries())
 
-            if each_slide_model.images:
-                prompts = slide_model_utils.get_image_prompts()
-                image_prompts.extend(prompts)
-                image_paths.extend(each_slide_model.images)
-            if each_slide_model.icons:
-                icon_queries.extend(slide_model_utils.get_icon_queries())
-                icon_paths.extend(each_slide_model.icons)
-
-        if icon_paths:
+        if icon_queries:
             icon_vector_store = get_icons_vectorstore()
+
+        images_directory = get_presentation_images_dir(self.presentation_id)
 
         coroutines = [
             generate_image(
                 each,
-                image_path,
+                images_directory,
             )
-            for each, image_path in zip(image_prompts, image_paths)
-        ] + [
-            get_icon(icon_vector_store, each, icon_path)
-            for each, icon_path in zip(icon_queries, icon_paths)
-        ]
+            for each in image_prompts
+        ] + [get_icon(icon_vector_store, each) for each in icon_queries]
 
         assets_future = asyncio.gather(*coroutines)
 
         while not assets_future.done():
-            status = SSEResponse(
-                event="response",
-                data=json.dumps({"status": "Fetching slide assets..."}),
-            ).to_string()
+            status = SSEStatusResponse(status="Fetching slide assets").to_string()
             yield status
             await asyncio.sleep(5)
 
-        await assets_future
+        assets = await assets_future
 
-        yield SSEResponse(
-            event="response", data=json.dumps({"status": "Slide assets fetched"})
-        ).to_string()
+        image_prompts_len = len(image_prompts)
+
+        images = assets[:image_prompts_len]
+        icons = assets[image_prompts_len:]
+
+        for each_slide_model in slide_models:
+            each_slide_model.images = images[: each_slide_model.images_count]
+            images = images[each_slide_model.images_count :]
+
+            each_slide_model.icons = icons[: each_slide_model.icons_count]
+            icons = icons[each_slide_model.icons_count :]
+
+        yield SSEStatusResponse(status="Slide assets fetched").to_string()

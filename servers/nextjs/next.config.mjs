@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output:"export",
   reactStrictMode: false,
 
   images: {
@@ -43,8 +42,12 @@ const nextConfig = {
       },
     ],
   },
-  
-
+  rewrites: async () => [
+    {
+      source: "/user-static/:path*",
+      destination: "/api/user-static/:path*",
+    },
+  ],
 };
 
 export default nextConfig;
