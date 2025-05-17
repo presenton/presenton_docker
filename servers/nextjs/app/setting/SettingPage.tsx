@@ -5,12 +5,6 @@ import Wrapper from "@/components/Wrapper";
 import { Settings, Key } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
-interface UserConfig {
-    LLM?: string;
-    OPENAI_API_KEY?: string;
-    GOOGLE_API_KEY?: string;
-}
-
 const PROVIDER_CONFIGS: Record<string, ProviderConfig> = {
     openai: {
         title: "OpenAI API Key",
@@ -38,8 +32,7 @@ const SettingsPage = () => {
     useEffect(() => {
         const loadConfig = async () => {
             try {
-                // @ts-ignore
-                const config = await window.electron.getUserConfig();
+                const config = await fetch('/api/user-config').then(res => res.json())
                 setConfig(config);
                 if (config.LLM) {
                     setSelectedProvider(config.LLM);
@@ -75,7 +68,10 @@ const SettingsPage = () => {
             };
 
             // @ts-ignore
-            await window.electron.setUserConfig(newConfig);
+            await fetch('/api/user-config', {
+                method: 'POST',
+                body: JSON.stringify(newConfig)
+            });
             setConfig(newConfig);
 
             toast({

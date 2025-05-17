@@ -98,7 +98,7 @@ export default function Home() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
     const [config, setConfig] = useState<ConfigState>({
-        provider: "openai",
+        provider: "",
         apiKey: "",
         textModel: PROVIDER_CONFIGS.openai.textModels[0].value,
         imageModel: PROVIDER_CONFIGS.openai.imageModels[0].value,
@@ -108,7 +108,7 @@ export default function Home() {
         const checkExistingConfig = async () => {
             try {
                 // @ts-ignore
-                const savedConfig = await window.electron.getUserConfig();
+                const savedConfig: UserConfig = await fetch('/api/user-config').then(res => res.json())
 
                 // If either API key exists, redirect to upload
                 if (savedConfig?.OPENAI_API_KEY || savedConfig?.GOOGLE_API_KEY) {
@@ -167,14 +167,17 @@ export default function Home() {
 
         try {
             // @ts-ignore
-            await window.electron.setUserConfig({
-                LLM: config.provider,
-                [config.provider === 'openai' ? 'OPENAI_API_KEY' : 'GOOGLE_API_KEY']: config.apiKey
+            await fetch('/api/user-config', {
+                method: 'POST',
+                body: JSON.stringify({
+                    LLM: config.provider,
+                    [config.provider === 'openai' ? 'OPENAI_API_KEY' : 'GOOGLE_API_KEY']: config.apiKey
+                })
             });
 
             toast({
                 title: "Configuration saved",
-                description: "You can now upload your presentation",
+                description: "You can now create presentations",
             });
 
             router.push("/upload");
