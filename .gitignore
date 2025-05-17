@@ -6,3 +6,4 @@ __pycache__
 .next
 node_modules
 out
+user_data

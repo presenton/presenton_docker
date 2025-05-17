@@ -4,11 +4,18 @@ const util = require('util');
 const { spawn, exec } = require('child_process');
 const execAsync = util.promisify(exec);
 const fs = require('fs');
+const http = require('http');
+const handler = require('serve-handler');
 
 
 const isDev = process.env.NODE_ENV === 'development';
 const fastapiDir = path.join(__dirname, 'servers/fastapi');
 const nextjsDir = path.join(__dirname, 'servers/nextjs');
+
+const staticServerPort = 3001;
+const staticServerUrl = `http://localhost:${staticServerPort}`;
+process.env.NEXT_PUBLIC_STATIC_SERVER_URL = staticServerUrl;
+process.env.STATIC_SERVER_URL = staticServerUrl;
 
 const setupUserConfigFromEnv = async () => {
   const userConfigPath = process.env.USER_CONFIG_PATH;
@@ -33,9 +40,6 @@ const startServers = async () => {
   fastApiProcess.stdout.on("data", (data) => {
     console.log(`FastAPI: ${data}`);
   });
-  fastApiProcess.stderr.on("data", (data) => {
-    console.error(`FastAPI Error: ${data}`);
-  });
 
   // Wait for FastAPI server to start
   await execAsync(`npx wait-on http://localhost:8000/docs`);
@@ -53,12 +57,19 @@ const startServers = async () => {
   nextjsProcess.stdout.on("data", (data) => {
     console.log(`NextJS: ${data}`);
   });
-  nextjsProcess.stderr.on("data", (data) => {
-    console.error(`NextJS Error: ${data}`);
-  });
 
   // Wait for NextJS server to start
   await execAsync(`npx wait-on http://localhost:3000`);
+
+  // Start App Data Static Server
+  const staticServer = http.createServer((req, res) => {
+    return handler(req, res, {
+      public: process.env.APP_DATA_DIRECTORY,
+    });
+  })
+  staticServer.listen(staticServerPort, () => {
+    console.log(`Static Server: ${staticServerUrl}`);
+  })
 }
 
 setupUserConfigFromEnv();

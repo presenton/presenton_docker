@@ -46,7 +46,8 @@ import ThemeSelector from "./ThemeSelector";
 import Modal from "./Modal";
 
 import Announcement from "@/components/Announcement";
-import { getFontLink } from "../../utils/others";
+import { getFontLink, getStaticFileUrl } from "../../utils/others";
+import path from "path";
 
 const Header = ({
   presentation_id,
@@ -60,6 +61,8 @@ const Header = ({
   const router = useRouter();
 
   const [showCustomThemeModal, setShowCustomThemeModal] = useState(false);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [downloadPath, setDownloadPath] = useState("");
   const { currentTheme, currentColors } = useSelector(
     (state: RootState) => state.theme
   );
@@ -126,15 +129,14 @@ const Header = ({
 
   const getSlideMetadata = async () => {
     try {
-      // Get the current URL without any query parameters
-      // const baseUrl = `${window.location.origin}/pdf-maker?id=${presentation_id}`;
-      const baseUrl = window.location.href;
-      // @ts-ignore
-      const metadata = await window.electron.getSlideMetadata(
-        baseUrl,
-        currentTheme,
-        currentColors,
-      );
+      const metadata = await (await fetch('/api/slide-metadata', {
+        method: 'POST',
+        body: JSON.stringify({
+          url: window.location.href,
+          theme: currentTheme,
+          customColors: currentColors,
+        })
+      })).json()
 
       console.log("metadata", metadata);
       return metadata;
@@ -190,14 +192,10 @@ const Header = ({
 
       const response = await PresentationGenerationApi.exportAsPPTX(apiBody);
       if (response.path) {
-        setShowLoader(false);
-        // @ts-ignore
-        const ipcResponse = await window.electron.fileDownloaded(response.path);
-        if (!ipcResponse.success) {
-          throw new Error("Failed to download file");
-        }
+        const staticFileUrl = getStaticFileUrl(response.path);
+        window.open(staticFileUrl, '_self');
       } else {
-        throw new Error("No URL returned from export");
+        throw new Error("No path returned from export");
       }
     } catch (error) {
       console.error("Export failed:", error);
@@ -216,18 +214,25 @@ const Header = ({
   const handleExportPdf = async () => {
     if (isStreaming) return;
 
-    setOpen(false);
     try {
-      toast({
-        title: "Exporting presentation...",
-        description: "Please wait while we export your presentation.",
-        variant: "default",
+      setOpen(false);
+      setShowLoader(true);
+
+      const domain = window.location.origin;
+      const response = await fetch('/api/export-as-pdf', {
+        method: 'POST',
+        body: JSON.stringify({
+          url: `${domain}/pdf-maker?id=${presentation_id}`,
+          title: presentationData!.presentation!.title,
+        })
       });
 
-      // @ts-ignore
-      const ipcResponse = await window.electron.exportAsPDF(presentation_id, presentationData!.presentation!.title);
-      if (!ipcResponse.success) {
-        throw new Error("Failed to export as PDF");
+      if (response.ok) {
+        const { path: pdfPath } = await response.json();
+        const staticFileUrl = getStaticFileUrl(pdfPath);
+        window.open(staticFileUrl, '_blank');
+      } else {
+        throw new Error("Failed to export PDF");
       }
 
     } catch (err) {
@@ -238,6 +243,8 @@ const Header = ({
           "We are having trouble exporting your presentation. Please try again.",
         variant: "default",
       });
+    } finally {
+      setShowLoader(false);
     }
   };
 
@@ -391,6 +398,17 @@ const Header = ({
           </Sheet>
         </div>
       </Wrapper>
+      {/* Download Modal */}
+      <Modal
+        isOpen={showDownloadModal}
+        onClose={() => setShowDownloadModal(false)}
+        title="File Downloaded"
+      >
+        <div className="text-center">
+          <p className="text-gray-600">Your file is saved at:</p>
+          <p className="font-mono text-sm mt-2 break-all">{downloadPath}</p>
+        </div>
+      </Modal>
     </div>
   );
 };

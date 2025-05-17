@@ -1,3 +1,5 @@
+import path from "path";
+
 export const getIconFromFile = (file: string): string => {
   const file_ext = file.split(".").pop()?.toLowerCase() ?? "";
   if (file_ext == "pdf") {
@@ -214,3 +216,14 @@ export const ThemeImagePrompt = {
     " Inspirational and creative with a youthful and playful tone, featuring light, pastel colors including blue, pink, and purple, all blending in a vibrant gradient.",
   custom: "",
 };
+
+
+export function sanitizeFilename(filename: string): string {
+  return filename.replace(/[\\/:*?"<>|]/g, '_');
+}
+
+export function getStaticFileUrl(filepath: string): string {
+  const pathParts = filepath.split('/');
+  const relevantPath = pathParts.slice(3).join('/');
+  return `${process.env.NEXT_PUBLIC_STATIC_SERVER_URL}/${relevantPath}`;
+}
