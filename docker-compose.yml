@@ -1,5 +1,3 @@
-version: '3'  
-  
 services:  
   presenton:  
     build:  
@@ -7,10 +5,9 @@ services:
       dockerfile: Dockerfile  
     ports:  
       - "3000:3000"
-      - "3001:3001"
       - "8000:8000"
     volumes:  
-      - ./user_data:/app/user_data  
-    environment:  
+      - ./user_data:/app/user_data
+    environment:
+      - TEMP_DIRECTORY=/tmp/presenton
       - APP_DATA_DIRECTORY=/app/user_data
-      - USER_CONFIG_PATH=/app/user_data/userConfig.json

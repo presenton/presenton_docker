@@ -19,10 +19,9 @@ WORKDIR /app/servers/nextjs
 RUN npm install && npm run build
 
 WORKDIR /app
-ENV TEMP_DIRECTORY=/tmp/presenton
 
-# Expose the ports for Next.js, Static Server, and FastAPI
-EXPOSE 3000 3001 8000
+# Expose the ports for Next.js and FastAPI
+EXPOSE 3000 8000
 
 # Start the servers
 CMD ["node", "start.js"]

@@ -1,77 +1,71 @@
-require('dotenv').config();
 const path = require('path');
 const util = require('util');
-const { spawn, exec } = require('child_process');
-const execAsync = util.promisify(exec);
+const { spawn } = require('child_process');
+const execAsync = util.promisify(require('child_process').exec);
 const fs = require('fs');
-const http = require('http');
-const handler = require('serve-handler');
 
-
-const isDev = process.env.NODE_ENV === 'development';
 const fastapiDir = path.join(__dirname, 'servers/fastapi');
 const nextjsDir = path.join(__dirname, 'servers/nextjs');
 
-const staticServerPort = 3001;
-const staticServerUrl = `http://localhost:${staticServerPort}`;
-process.env.NEXT_PUBLIC_STATIC_SERVER_URL = staticServerUrl;
-process.env.STATIC_SERVER_URL = staticServerUrl;
-process.env.USER_CONFIG_PATH = path.join(process.env.APP_DATA_DIRECTORY, 'user_config.json');
+const localhost = '127.0.0.1';
+const fastapiPort = 8000;
+const nextjsPort = 3000;
 
-const setupUserConfigFromEnv = async () => {
+process.env.USER_CONFIG_PATH = path.join(process.env.APP_DATA_DIRECTORY || "/app", 'userConfig.json');
+process.env.NEXT_PUBLIC_FAST_API = `http://${localhost}:${fastapiPort}`;
+
+const setupUserConfigFromEnv = () => {
   const userConfigPath = process.env.USER_CONFIG_PATH;
   const userConfig = {
     LLM: process.env.LLM,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
-  }
+  };
   fs.writeFileSync(userConfigPath, JSON.stringify(userConfig));
-}
+};
 
 const startServers = async () => {
+
   const fastApiProcess = spawn(
-    isDev ? ".venv/bin/python" : "python",
-    ["server.py", "--port", "8000"],
+    "python",
+    ["server.py", "--port", fastapiPort.toString()],
     {
       cwd: fastapiDir,
-      stdio: ["inherit", "pipe", "pipe"],
+      stdio: "inherit",
       env: process.env,
     }
   );
-  fastApiProcess.stdout.on("data", (data) => {
-    console.log(`FastAPI: ${data}`);
+
+  fastApiProcess.on("error", err => {
+    console.error("FastAPI process failed to start:", err);
   });
 
-  // Wait for FastAPI server to start
-  await execAsync(`npx wait-on http://localhost:8000/docs`);
+  // Wait for FastAPI to be available
+  await execAsync(`npx wait-on http://${localhost}:${fastapiPort}/docs`);
 
-  // Start NextJS server
   const nextjsProcess = spawn(
     "npm",
-    isDev ? ["run", "dev", "--", "-p", "3000"] : ["run", "start", "--", "-p", "3000"],
+    ["run", "start", "--", "-p", nextjsPort.toString()],
     {
       cwd: nextjsDir,
-      stdio: ["inherit", "pipe", "pipe"],
+      stdio: "inherit",
       env: process.env,
     }
   );
-  nextjsProcess.stdout.on("data", (data) => {
-    console.log(`NextJS: ${data}`);
+
+  nextjsProcess.on("error", err => {
+    console.error("Next.js process failed to start:", err);
   });
 
-  // Wait for NextJS server to start
-  await execAsync(`npx wait-on http://localhost:3000`);
+  // Keep the Node process alive until both servers exit
+  const exitCode = await Promise.race([
+    new Promise(resolve => fastApiProcess.on("exit", resolve)),
+    new Promise(resolve => nextjsProcess.on("exit", resolve)),
+  ]);
 
-  // Start App Data Static Server
-  const staticServer = http.createServer((req, res) => {
-    return handler(req, res, {
-      public: process.env.APP_DATA_DIRECTORY,
-    });
-  })
-  staticServer.listen(staticServerPort, () => {
-    console.log(`Static Server: ${staticServerUrl}`);
-  })
-}
+  console.log(`One of the processes exited. Exit code: ${exitCode}`);
+  process.exit(exitCode);
+};
 
 setupUserConfigFromEnv();
 startServers();

@@ -5,7 +5,7 @@ const userConfigPath = process.env.USER_CONFIG_PATH!;
 
 export async function GET() {
   if (!fs.existsSync(userConfigPath)) {
-    return {}
+    return NextResponse.json({})
   }
   const configData = fs.readFileSync(userConfigPath, 'utf-8')
   return NextResponse.json(JSON.parse(configData))

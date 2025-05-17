@@ -7,7 +7,7 @@ from api.routers.presentation.models import (
 )
 from api.services.logging import LoggingService
 from api.services.instances import temp_file_service
-from api.utils import get_presentation_dir
+from api.utils import get_presentation_dir, get_presentation_images_dir
 from image_processor.images_finder import generate_image
 
 
@@ -28,10 +28,8 @@ class GenerateImageHandler:
             extra=log_metadata.model_dump(),
         )
 
-        image_path = os.path.join(
-            self.presentation_dir, "generated_images", str(uuid.uuid4()) + ".jpg"
-        )
-        await generate_image(self.data.prompt, image_path)
+        images_directory = get_presentation_images_dir(self.data.presentation_id)
+        image_path = await generate_image(self.data.prompt, images_directory)
 
         response = PresentationAndPaths(
             presentation_id=self.data.presentation_id, paths=[image_path]

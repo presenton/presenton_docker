@@ -53,7 +53,7 @@ export function removeUUID(fileName: string) {
 
 
 export function generateRandomId(): string {
-  const length = 36; 
+  const length = 36;
   const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_';
   let id = '';
   for (let i = 0; i < length; i++) {
@@ -65,26 +65,26 @@ export function generateRandomId(): string {
 
 export const getFontLink = (fontName: string) => {
   if (!fontName) {
-    return {link: '', name: ''};
+    return { link: '', name: '' };
   }
- 
-  if (  fontName.includes('instrument')) {
-    return{link: 'https://fonts.google.com/specimen/Instrument+Sans', name: 'Instrument Sans'}
+
+  if (fontName.includes('instrument')) {
+    return { link: 'https://fonts.google.com/specimen/Instrument+Sans', name: 'Instrument Sans' }
   }
   if (fontName.includes('fraunces')) {
-    return{link: 'https://fonts.google.com/specimen/Fraunces', name: 'Fraunces'}
+    return { link: 'https://fonts.google.com/specimen/Fraunces', name: 'Fraunces' }
   }
   if (fontName.includes('montserrat')) {
-    return{link: 'https://fonts.google.com/specimen/Montserrat', name: 'Montserrat'}
+    return { link: 'https://fonts.google.com/specimen/Montserrat', name: 'Montserrat' }
   }
   if (fontName.includes('inria-serif')) {
-    return{link: 'https://fonts.google.com/specimen/Inria+Serif', name: 'Inria Serif'}
+    return { link: 'https://fonts.google.com/specimen/Inria+Serif', name: 'Inria Serif' }
   }
-  if(fontName.includes('inter')) {
-    return{link: 'https://fonts.google.com/specimen/Inter', name: 'Inter'}
+  if (fontName.includes('inter')) {
+    return { link: 'https://fonts.google.com/specimen/Inter', name: 'Inter' }
   }
   else {
-    return {link: '', name: ''};
+    return { link: '', name: '' };
   }
 
 }
@@ -224,6 +224,6 @@ export function sanitizeFilename(filename: string): string {
 
 export function getStaticFileUrl(filepath: string): string {
   const pathParts = filepath.split('/');
-  const relevantPath = pathParts.slice(3).join('/');
-  return `${process.env.NEXT_PUBLIC_STATIC_SERVER_URL}/${relevantPath}`;
+  const relevantPath = pathParts.slice(1).join('/');
+  return path.join("/static", relevantPath);
 }
