@@ -2,6 +2,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { PresentationGenerationApi } from "../../services/api/presentation-generation";
 import MiniTypeWriter from "./MiniTypeWriter";
+import { getStaticFileUrl } from "../../utils/others";
 
 interface Type8MiniProps {
   title: string;
@@ -16,10 +17,7 @@ interface Type8MiniProps {
 const Type8Mini = ({ title, description, body, icons }: Type8MiniProps) => {
   const { currentColors } = useSelector((state: RootState) => state.theme);
   const updatedIcons = icons.map((icon) => {
-    if (icon.startsWith("user")) {
-      return `file://${icon}`;
-    }
-    return icon;
+    return getStaticFileUrl(icon);
   });
 
   return (

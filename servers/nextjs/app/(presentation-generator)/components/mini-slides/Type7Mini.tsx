@@ -2,6 +2,7 @@ import { useSelector } from "react-redux";
 import { PresentationGenerationApi } from "../../services/api/presentation-generation";
 import { RootState } from "@/store/store";
 import MiniTypeWriter from "./MiniTypeWriter";
+import { getStaticFileUrl } from "../../utils/others";
 
 interface Type7MiniProps {
   title: string;
@@ -16,10 +17,8 @@ const Type7Mini = ({ title, body, icons }: Type7MiniProps) => {
   const { currentColors } = useSelector((state: RootState) => state.theme);
   const isGridLayout = body.length === 4;
   const updatedIcons = icons.map((icon) => {
-    if (icon.startsWith("user")) {
-      return `file://${icon}`;
-    }
-    return icon;
+
+    return getStaticFileUrl(icon);
   });
 
   return (

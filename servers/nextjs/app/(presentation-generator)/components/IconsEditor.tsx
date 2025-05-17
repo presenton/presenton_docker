@@ -16,6 +16,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { updateSlideIcon } from "@/store/slices/presentationGeneration";
+import { getStaticFileUrl } from "../utils/others";
 
 interface IconsEditorProps {
   icon: string;
@@ -112,7 +113,7 @@ const IconsEditor = ({
       >
         {icon ? (
           <img
-            src={`file://${icon}`}
+            src={getStaticFileUrl(icon)}
             alt="slide icon"
             className={`object-contain w-[16px] h-[16px] md:w-[32px] md:h-[32px] ${hasBg ? "brightness-0 invert" : ""
               }`}
@@ -195,7 +196,7 @@ const IconsEditor = ({
                       className="w-12 h-12 cursor-pointer group relative rounded-lg overflow-hidden hover:bg-gray-100 p-2"
                     >
                       <img
-                        src={`file://${iconSrc}`}
+                        src={getStaticFileUrl(iconSrc)}
                         alt={`Icon ${idx + 1}`}
                         className="w-full h-full object-contain "
                       />
