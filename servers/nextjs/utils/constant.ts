@@ -4,8 +4,7 @@
 export const getEnv = () => {
   return {
     BASE_URL: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000',
-    USER_CONFIG_PATH: process.env.NEXT_PUBLIC_USER_CONFIG_PATH || '/tmp/userConfig.json',
-    NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL || '/tmp',
+    NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL || 'http://localhost:3000',
     TEMP_DIRECTORY: process.env.TEMP_DIRECTORY || '/tmp',
   };
 };

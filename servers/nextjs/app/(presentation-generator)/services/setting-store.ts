@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 
-const userDataDir = process.env.USER_DATA_DIR || '/temp';
+const userDataDir = process.env.USER_DATA_DIR || '/tmp';
 class SettingsStore {
   private settingsPath: string;
   private settings: { [key: string]: any };

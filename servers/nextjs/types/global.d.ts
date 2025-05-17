@@ -11,4 +11,10 @@ interface TextFrameProps {
   content: string;
   position: { x: number; y: number };
   // Add other properties as needed
-} 
+}
+
+interface UserConfig {
+  LLM?: string;
+  OPENAI_API_KEY?: string;
+  GOOGLE_API_KEY?: string;
+}

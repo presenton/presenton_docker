@@ -25,7 +25,7 @@ def get_user_config():
 
     existing_config = UserConfig()
     try:
-        if os.path.exists(user_config_path):
+        if user_config_path and os.path.exists(user_config_path):
             with open(user_config_path, "r") as f:
                 existing_config = UserConfig(**json.load(f))
     except Exception as e:
