@@ -44,8 +44,8 @@ const nextConfig = {
   },
   rewrites: async () => [
     {
-      source: "/user-static/:path*",
-      destination: "/api/user-static/:path*",
+      source: "/static/:path*",
+      destination: "/api/static/:path*",
     },
   ],
 };
