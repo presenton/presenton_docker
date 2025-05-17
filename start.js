@@ -16,6 +16,7 @@ const staticServerPort = 3001;
 const staticServerUrl = `http://localhost:${staticServerPort}`;
 process.env.NEXT_PUBLIC_STATIC_SERVER_URL = staticServerUrl;
 process.env.STATIC_SERVER_URL = staticServerUrl;
+process.env.USER_CONFIG_PATH = path.join(process.env.APP_DATA_DIRECTORY, 'user_config.json');
 
 const setupUserConfigFromEnv = async () => {
   const userConfigPath = process.env.USER_CONFIG_PATH;

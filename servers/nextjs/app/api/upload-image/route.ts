@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
 import crypto from "crypto";
-import os from "os";
 
-const userDataDir = process.env.USER_DATA_DIR || '/tmp';
+
+const userDataDir = process.env.APP_DATA_DIRECTORY || '/tmp/presenton-docker/';
 
 export async function POST(request: NextRequest) {
   try {
