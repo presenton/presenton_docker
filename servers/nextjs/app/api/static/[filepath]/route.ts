@@ -2,19 +2,18 @@ import fs from 'fs';
 import path from 'path';
 import { NextRequest, NextResponse } from 'next/server';
 
-const BASE_DIR = process.env.APP_DATA_DIRECTORY!;
 
 export async function GET(
   request: NextRequest,
+  { params }: { params: { filepath: string } },
 ) {
-  const url = new URL(request.url);
-  const filename = url.pathname.split('/user-static/')[1];
+  const BASE_DIR = "/app";
 
-  if (!filename) {
+  if (!params.filepath) {
     return new NextResponse('No file specified', { status: 400 });
   }
 
-  const filePath = path.join(BASE_DIR, filename);
+  const filePath = path.join(BASE_DIR, params.filepath);
 
   if (!fs.existsSync(filePath)) {
     return new NextResponse('File not found', { status: 404 });
