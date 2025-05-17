@@ -16,10 +16,13 @@ RUN pip install -r requirements.txt
 
 # Install dependencies for Next.js
 WORKDIR /app/servers/nextjs
-RUN npm install
+RUN npm install && npm run build
 
-# Expose the ports for FastAPI and Next.js
-EXPOSE 3000 8000
+WORKDIR /app
+ENV TEMP_DIRECTORY=/tmp/presenton
+
+# Expose the ports for Next.js, Static Server, and FastAPI
+EXPOSE 3000 3001 8000
 
 # Start the servers
 CMD ["node", "start.js"]
