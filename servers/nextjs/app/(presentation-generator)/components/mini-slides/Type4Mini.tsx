@@ -1,3 +1,4 @@
+import { getStaticFileUrl } from "../../utils/others";
 import MiniTypeWriter from "./MiniTypeWriter";
 
 interface Type4MiniProps {
@@ -12,9 +13,9 @@ interface Type4MiniProps {
 const Type4Mini = ({ title, body, images }: Type4MiniProps) => {
   const updatedImages = images.map((image) => {
     if (image.startsWith("user")) {
-      return `file://${image}`;
+      return getStaticFileUrl(image);
     }
-    return `file://${image}`;
+    return getStaticFileUrl(image);
   });
   const getGridCols = (length: number) => {
     switch (length) {

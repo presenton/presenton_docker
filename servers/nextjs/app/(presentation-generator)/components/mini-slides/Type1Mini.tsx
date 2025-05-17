@@ -1,4 +1,5 @@
 import { PresentationGenerationApi } from "../../services/api/presentation-generation";
+import { getStaticFileUrl } from "../../utils/others";
 import MiniTypeWriter from "./MiniTypeWriter";
 
 interface Type1MiniProps {
@@ -8,7 +9,7 @@ interface Type1MiniProps {
 }
 
 const Type1Mini = ({ title, description, image }: Type1MiniProps) => {
-  const updatedImage = image.startsWith("user") ? `file://${image}` : `file://${image}`;
+  const updatedImage = getStaticFileUrl(image);
   return (
     <div className="slide-container w-full aspect-video bg-white p-2 flex items-center justify-center rounded-lg text-[6px] border shadow-xl">
       <div className="grid grid-cols-2 gap-2 h-full">
