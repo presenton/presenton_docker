@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="readme_assets/images/presenton-logo.png" height="100" alt="Presenton Logo" />
+  <img src="readme_assets/images/presenton-logo.png" height="90" alt="Presenton Logo" />
 </p>
 
 # Open-Source, Locally-Run AI Presentation Generator (Gamma Alternative)
