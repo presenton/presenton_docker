@@ -1,8 +1,4 @@
-> **Note: Presenton Docker is currently on development.**
-
-<p align="center">
-  <img src="readme_assets/images/logo.png" width="240" height="100" alt="Alt text" />
-</p>
+<img src="readme_assets/images/logo.png" height="70" alt="Alt text" />
 
 # Open-Source, Locally-Run AI Presentation Generator (Gamma Alternative)
 
