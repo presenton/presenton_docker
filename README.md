@@ -1,7 +1,5 @@
-> **Note: Presenton Docker is currently on development.**
-
 <p align="center">
-  <img src="readme_assets/images/logo.png" width="240" height="100" alt="Alt text" />
+  <img src="readme_assets/images/presenton-logo.png" height="90" alt="Presenton Logo" />
 </p>
 
 # Open-Source, Locally-Run AI Presentation Generator (Gamma Alternative)
@@ -20,6 +18,17 @@
 * ✅ **Flexible** — Generate presentations from prompts or outlines
 * ✅ **Export Ready** — Save as PowerPoint (PPTX) and PDF
 * ✅ **Fully Open-Source** — Apache 2.0 licensed
+
+## Running Presenton Docker
+
+#### 1. Clone this repository
+```git clone https://github.com/presenton/presenton_docker.git```
+
+#### 2. Start Presenton
+```cd presenton_docker && docker compose up```
+
+#### 3. Open Presenton
+Open http://localhost:3000 on browser of your choice to use Presenton.
 
 
 ## Features
