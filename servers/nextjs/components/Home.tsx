@@ -98,7 +98,7 @@ export default function Home() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
     const [config, setConfig] = useState<ConfigState>({
-        provider: "",
+        provider: "openai",
         apiKey: "",
         textModel: PROVIDER_CONFIGS.openai.textModels[0].value,
         imageModel: PROVIDER_CONFIGS.openai.imageModels[0].value,
@@ -107,7 +107,6 @@ export default function Home() {
     useEffect(() => {
         const checkExistingConfig = async () => {
             try {
-                // @ts-ignore
                 const savedConfig: UserConfig = await fetch('/api/user-config').then(res => res.json())
 
                 // If either API key exists, redirect to upload

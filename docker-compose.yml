@@ -8,6 +8,3 @@ services:
       - "8000:8000"
     volumes:  
       - ./user_data:/app/user_data
-    environment:
-      - TEMP_DIRECTORY=/tmp/presenton
-      - APP_DATA_DIRECTORY=/app/user_data

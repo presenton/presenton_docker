@@ -4,7 +4,7 @@ import fs from "fs";
 import crypto from "crypto";
 
 
-const userDataDir = process.env.APP_DATA_DIRECTORY || '/tmp/presenton-docker/';
+const userDataDir = process.env.APP_DATA_DIRECTORY!;
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     // Return the relative path that can be used in the frontend
     return NextResponse.json({ 
       success: true,
-      filePath: `/uploads/${filename}` 
+      filePath: `/app/user_data/uploads/${filename}` 
     });
   } catch (error) {
     console.error("Error saving image:", error);

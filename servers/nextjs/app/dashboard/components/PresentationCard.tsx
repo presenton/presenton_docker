@@ -11,6 +11,7 @@ import {
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import { PresentationGenerationApi } from "@/app/(presentation-generator)/services/api/presentation-generation";
+import { getStaticFileUrl } from "@/app/(presentation-generator)/utils/others";
 
 export const PresentationCard = ({
   id,
@@ -85,7 +86,7 @@ export const PresentationCard = ({
         <div className="relative border-2 border-gray-200 aspect-[16/9] rounded-[8px] overflow-hidden">
           {thumbnail ? (
             <img
-              src={`file://${thumbnail}`}
+              src={getStaticFileUrl(thumbnail)}
               alt={title}
               className="object-cover h-full w-full"
             />

@@ -7,7 +7,7 @@ const fs = require('fs');
 const fastapiDir = path.join(__dirname, 'servers/fastapi');
 const nextjsDir = path.join(__dirname, 'servers/nextjs');
 
-const localhost = '127.0.0.1';
+const localhost = '0.0.0.0';
 const fastapiPort = 8000;
 const nextjsPort = 3000;
 
@@ -16,13 +16,17 @@ process.env.NEXT_PUBLIC_FAST_API = `http://${localhost}:${fastapiPort}`;
 
 const setupUserConfigFromEnv = () => {
   const userConfigPath = process.env.USER_CONFIG_PATH;
+  let existingConfig = {};
+  if (fs.existsSync(userConfigPath)) {
+    existingConfig = JSON.parse(fs.readFileSync(userConfigPath, 'utf8'));
+  }
   const userConfig = {
-    LLM: process.env.LLM,
-    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-    GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
+    LLM: process.env.LLM || existingConfig.LLM,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY || existingConfig.OPENAI_API_KEY,
+    GOOGLE_API_KEY: process.env.GOOGLE_API_KEY || existingConfig.GOOGLE_API_KEY,
   };
   fs.writeFileSync(userConfigPath, JSON.stringify(userConfig));
-};
+}
 
 const startServers = async () => {
 
