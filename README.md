@@ -21,6 +21,17 @@
 * ✅ **Export Ready** — Save as PowerPoint (PPTX) and PDF
 * ✅ **Fully Open-Source** — Apache 2.0 licensed
 
+## Running Presenton Docker
+
+#### 1. Clone this repository
+```git clone https://github.com/presenton/presenton_docker.git```
+
+#### 2. Start Presenton
+```cd presenton_docker && docker compose up```
+
+#### 3. Open Presenton
+Open http://localhost:3000 on browser of your choice to use Presenton.
+
 
 ## Features
 
