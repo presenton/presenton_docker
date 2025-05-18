@@ -23,15 +23,19 @@ RUN npx puppeteer browsers install chrome --install-deps
 
 WORKDIR /app
 
-# Copy the start script and the servers directory
-COPY start.js LICENSE NOTICE ./
-COPY servers ./servers
+# Copy Next.js app
+COPY servers/nextjs/ ./servers/nextjs/
 
 # Build the Next.js app
 WORKDIR /app/servers/nextjs
 RUN npm run build
 
 WORKDIR /app
+
+# Copy FastAPI and start script
+COPY servers/fastapi/ ./servers/fastapi/
+COPY start.js LICENSE NOTICE ./
+
 ENV APP_DATA_DIRECTORY=/app/user_data
 ENV TEMP_DIRECTORY=/tmp/presenton
 
