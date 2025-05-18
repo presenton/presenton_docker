@@ -5,20 +5,35 @@ RUN apt-get update && apt-get install -y \
     nodejs \  
     npm
   
-# Copy the start script and the servers directory
+# Create a working directory
 WORKDIR /app  
-COPY start.js LICENSE NOTICE ./
-COPY servers ./servers
 
 # Install dependencies for FastAPI
-WORKDIR /app/servers/fastapi
+COPY servers/fastapi/requirements.txt ./
 RUN pip install -r requirements.txt
+
 
 # Install dependencies for Next.js
 WORKDIR /app/servers/nextjs
-RUN npm install && npm run build
+COPY servers/nextjs/package.json servers/nextjs/package-lock.json ./
+RUN npm install
+
+# Install chrome for puppeteer
+RUN npx puppeteer browsers install chrome --install-deps
 
 WORKDIR /app
+
+# Copy the start script and the servers directory
+COPY start.js LICENSE NOTICE ./
+COPY servers ./servers
+
+# Build the Next.js app
+WORKDIR /app/servers/nextjs
+RUN npm run build
+
+WORKDIR /app
+ENV APP_DATA_DIRECTORY=/app/user_data
+ENV TEMP_DIRECTORY=/tmp/presenton
 
 # Expose the ports for Next.js and FastAPI
 EXPOSE 3000 8000

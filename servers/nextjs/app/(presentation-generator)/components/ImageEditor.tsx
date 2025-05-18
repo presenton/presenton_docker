@@ -555,7 +555,7 @@ const ImageEditor = ({
                           <img
                             src={
                               image
-                                ? `file://${image}`
+                                ? getStaticFileUrl(image)
                                 : ""
                             }
                             alt={`Preview ${index + 1}`}

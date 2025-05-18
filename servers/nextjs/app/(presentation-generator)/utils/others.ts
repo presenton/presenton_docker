@@ -224,6 +224,6 @@ export function sanitizeFilename(filename: string): string {
 
 export function getStaticFileUrl(filepath: string): string {
   const pathParts = filepath.split('/');
-  const relevantPath = pathParts.slice(1).join('/');
+  const relevantPath = pathParts.slice(2).join('/');
   return path.join("/static", relevantPath);
 }

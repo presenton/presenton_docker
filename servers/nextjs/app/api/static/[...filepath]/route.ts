@@ -5,15 +5,17 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { filepath: string } },
+  { params }: { params: { filepath: string[] } },
 ) {
   const BASE_DIR = "/app";
+
+  const filepath = params.filepath.join("/");
 
   if (!params.filepath) {
     return new NextResponse('No file specified', { status: 400 });
   }
 
-  const filePath = path.join(BASE_DIR, params.filepath);
+  const filePath = path.join(BASE_DIR, filepath);
 
   if (!fs.existsSync(filePath)) {
     return new NextResponse('File not found', { status: 404 });
