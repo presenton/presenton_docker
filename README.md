@@ -29,7 +29,7 @@ Run ```docker run -it --name presenton -p 3000:3000 -p 8000:8000 -v "./user_data
 
 ##### Windows (PowerShell):
 
-  - Run ```docker run -it --name presenton -p 3000:3000 -p 8000:8000 -v "${PWD}\user_data:/app/user_data" ghcr.io/presenton/presenton:latest```
+Run ```docker run -it --name presenton -p 3000:3000 -p 8000:8000 -v "${PWD}\user_data:/app/user_data" ghcr.io/presenton/presenton:latest```
 
 #### 2. Open Presenton
 Open http://localhost:3000 on browser of your choice to use Presenton.
