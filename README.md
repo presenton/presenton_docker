@@ -21,13 +21,10 @@
 
 ## Running Presenton Docker
 
-#### 1. Setup
-Download **docker-compose.yml**.
+#### 1. Start Presenton
+Run ```docker run -it --name presenton -p 3000:3000 -p 8000:8000 -v "./user_data:/app/user_data" ghcr.io/presenton/presenton:latest```
 
-#### 2. Start Presenton
-Run ```docker compose up```.
-
-#### 3. Open Presenton
+#### 2. Open Presenton
 Open http://localhost:3000 on browser of your choice to use Presenton.
 
 
