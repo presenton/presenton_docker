@@ -1,8 +1,6 @@
 services:  
   presenton:  
-    build:  
-      context: .  
-      dockerfile: Dockerfile  
+    image: ghcr.io/presenton/presenton:0.2.1-beta
     ports:  
       - "3000:3000"
       - "8000:8000"

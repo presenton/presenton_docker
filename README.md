@@ -21,11 +21,11 @@
 
 ## Running Presenton Docker
 
-#### 1. Clone this repository
-```git clone https://github.com/presenton/presenton_docker.git```
+#### 1. Setup
+Download **docker-compose.yml**.
 
 #### 2. Start Presenton
-```cd presenton_docker && docker compose up```
+Run ```docker compose up```.
 
 #### 3. Open Presenton
 Open http://localhost:3000 on browser of your choice to use Presenton.
