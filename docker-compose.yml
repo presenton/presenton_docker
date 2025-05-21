@@ -1,6 +1,6 @@
 services:  
   presenton:  
-    image: ghcr.io/presenton/presenton:0.2.1-beta
+    image: ghcr.io/presenton/presenton:latest
     ports:  
       - "3000:3000"
       - "8000:8000"
