@@ -1,7 +1,5 @@
 from enum import Enum
-import json
 from typing import List, Optional
-import uuid
 from pydantic import BaseModel, Field, model_validator
 
 from graph_processor.utils import clip_text
@@ -69,8 +67,8 @@ class BarGraphDataModel(BaseModel):
         return [clip_text(category) for category in self.categories]
 
 
-# class ScatterChartDataModel(BaseModel):
-#     series: List[ScatterSeriesModel]
+class ScatterChartDataModel(BaseModel):
+    series: List[ScatterSeriesModel]
 
 
 class BubbleChartDataModel(BaseModel):
@@ -136,44 +134,6 @@ class GraphModel(BaseModel):
         | BarGraphDataModel
         | TableDataModel
     )
-
-    @classmethod
-    def from_dict(cls, data):
-        graph_model = cls(**data)
-        graph_model.data = GRAPH_TYPE_MAPPING[graph_model.type](**data["data"])
-        return graph_model
-
-    def to_create_dict(self, presentation: Optional[str] = None, auto_id: bool = False):
-        temp = json.loads(self.model_dump_json())
-        if presentation:
-            temp["presentation"] = presentation
-
-        if not self.id:
-            if auto_id:
-                temp["id"] = str(uuid.uuid4())
-            else:
-                del temp["id"]
-
-        if "corrections" in temp:
-            del temp["corrections"]
-
-        return temp
-
-    def to_update_dict(self):
-        temp = self.to_create_dict()
-        del temp["id"]
-        return temp
-
-    def to_name_type_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "type": self.type.value,
-        }
-
-
-class GraphCollectionModel(BaseModel):
-    graphs: List[GraphModel]
 
 
 GRAPH_TYPE_MAPPING = {
