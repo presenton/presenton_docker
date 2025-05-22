@@ -38,32 +38,24 @@ class UpdateSlideModelsHandler:
         presentation_id = self.data.presentation_id
         new_slides = self.data.slides
 
-        # Handle assets (images and icons)
-        assets_local_paths = []
-        assets_download_links = []
+        # Handle images
+        images_local_paths = []
+        images_download_links = []
         for new_slide in new_slides:
             new_images = new_slide.images or []
-            new_icons = new_slide.icons or []
+            for i, image in enumerate(new_images):
+                if image.startswith("http"):
+                    parsed_url = unquote(urlparse(image).path)
+                    image_name = replace_file_name(
+                        os.path.basename(parsed_url), str(uuid.uuid4())
+                    )
+                    image_path = f"{self.presentation_dir}/images/{image_name}"
+                    images_local_paths.append(image_path)
+                    images_download_links.append(image)
+                    new_slide.images[i] = image_path
 
-            for new_assets, asset_type in [
-                (new_images, "images"),
-                (new_icons, "icons"),
-            ]:
-                for i, asset in enumerate(new_assets):
-                    if asset.startswith("http"):
-                        parsed_url = unquote(urlparse(asset).path)
-                        image_name = replace_file_name(
-                            os.path.basename(parsed_url), str(uuid.uuid4())
-                        )
-                        asset_path = (
-                            f"{self.presentation_dir}/{asset_type}/{image_name}"
-                        )
-                        assets_local_paths.append(asset_path)
-                        assets_download_links.append(asset)
-                        getattr(new_slide, asset_type)[i] = asset_path
-
-        if assets_download_links:
-            await download_files(assets_download_links, assets_local_paths)
+        if images_download_links:
+            await download_files(images_download_links, images_local_paths)
 
         with get_sql_session() as sql_session:
             slide_sql_models = [
