@@ -2,6 +2,7 @@
 'use client';
 
 export const getEnv = () => {
+  console.log('NEXT_PUBLIC_FAST_API', process.env.NEXT_PUBLIC_FAST_API);
   const baseUrl =  process.env.NEXT_PUBLIC_FAST_API || 'http://localhost:8000';
 
   return {

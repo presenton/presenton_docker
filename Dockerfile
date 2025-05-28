@@ -26,8 +26,10 @@ WORKDIR /app
 # Copy Next.js app
 COPY servers/nextjs/ ./servers/nextjs/
 
-# Build the Next.js app
+# Build the Next.js app with environment variables
 WORKDIR /app/servers/nextjs
+ARG FASTAPI_URL=http://0.0.0.0:8000
+ENV NEXT_PUBLIC_FAST_API=${FASTAPI_URL}
 RUN npm run build
 
 WORKDIR /app
@@ -38,6 +40,8 @@ COPY start.js LICENSE NOTICE ./
 
 ENV APP_DATA_DIRECTORY=/app/user_data
 ENV TEMP_DIRECTORY=/tmp/presenton
+
+
 
 # Expose the ports for Next.js and FastAPI
 EXPOSE 3000 8000
