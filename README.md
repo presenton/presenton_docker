@@ -21,18 +21,34 @@
 
 ## Running Presenton Docker
 
+### Default Setup
+
 #### 1. Start Presenton
 
 ##### Linux/MacOS (Bash/Zsh Shell):
-
-Run ```docker run -it --name presenton -p 3000:3000 -p 8000:8000 -v "./user_data:/app/user_data" ghcr.io/presenton/presenton:latest```
+```bash
+docker run -it --name presenton -p 3000:3000 -p 8000:8000 -v "./user_data:/app/user_data" ghcr.io/presenton/presenton:latest
+```
 
 ##### Windows (PowerShell):
-
-Run ```docker run -it --name presenton -p 3000:3000 -p 8000:8000 -v "${PWD}\user_data:/app/user_data" ghcr.io/presenton/presenton:latest```
+```bash
+docker run -it --name presenton -p 3000:3000 -p 8000:8000 -v "${PWD}\user_data:/app/user_data" ghcr.io/presenton/presenton:latest
+```
 
 #### 2. Open Presenton
 Open http://localhost:3000 on browser of your choice to use Presenton.
+
+### Custom FastAPI URL Setup
+
+If you want to use a custom domain for your FastAPI backend:
+
+```bash
+FASTAPI_URL=https://your-domain.com docker compose up --build
+```
+
+**⚠️ Important**: You must configure a reverse proxy to route your custom domain to `localhost:8000` where FastAPI runs inside the container.
+
+**What this does**: Only changes the base URL that the frontend uses for API calls. FastAPI still runs on `localhost:8000` internally.
 
 
 ## Features
