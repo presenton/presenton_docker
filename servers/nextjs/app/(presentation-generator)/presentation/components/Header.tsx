@@ -132,7 +132,7 @@ const Header = ({
       const metadata = await (await fetch('/api/slide-metadata', {
         method: 'POST',
         body: JSON.stringify({
-          url: window.location.href,
+          url: 'http://localhost/presentation?id=' + presentation_id,
           theme: currentTheme,
           customColors: currentColors,
         })
@@ -218,11 +218,10 @@ const Header = ({
       setOpen(false);
       setShowLoader(true);
 
-      const domain = window.location.origin;
       const response = await fetch('/api/export-as-pdf', {
         method: 'POST',
         body: JSON.stringify({
-          url: `${domain}/pdf-maker?id=${presentation_id}`,
+          url: `http://localhost/pdf-maker?id=${presentation_id}`,
           title: presentationData!.presentation!.title,
         })
       });

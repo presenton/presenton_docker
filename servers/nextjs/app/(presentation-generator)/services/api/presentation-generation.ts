@@ -1,18 +1,12 @@
-import {  getEnv } from "@/utils/constant";
 import { getHeader, getHeaderForFormData } from "./header";
 import { IconSearch, ImageGenerate, ImageSearch } from "./params";
 
-const urls = getEnv();
-const BASE_URL = urls.BASE_URL;
 export class PresentationGenerationApi {
-  // static BASE_URL="https://api.presenton.ai";
-  // static BASE_URL="https://presentation-generator-fragrant-mountain-1643.fly.dev";
-  // static BASE_URL = "http://localhost:48388";
 
   static async getChapterDetails() {
     try {
       const response = await fetch(
-        `${BASE_URL}/ppt/chapter-details`,
+        `/api/v1/ppt/chapter-details`,
         {
           method: "GET",
           headers: getHeader(),
@@ -42,7 +36,7 @@ export class PresentationGenerationApi {
 
     try {
       const response = await fetch(
-        `${BASE_URL}/ppt/files/upload`,
+        `/api/v1/ppt/files/upload`,
         {
           method: "POST",
           headers: getHeaderForFormData(),
@@ -64,12 +58,12 @@ export class PresentationGenerationApi {
     }
   }
 
- 
+
 
   static async decomposeDocuments(documentKeys: string[], imageKeys: string[]) {
     try {
       const response = await fetch(
-        `${BASE_URL}/ppt/files/decompose`,
+        `/api/v1/ppt/files/decompose`,
         {
           method: "POST",
           headers: getHeader(),
@@ -99,7 +93,7 @@ export class PresentationGenerationApi {
   }) {
     try {
       const response = await fetch(
-        `${BASE_URL}/ppt/titles/generate`,
+        `/api/v1/ppt/titles/generate`,
         {
           method: "POST",
           headers: getHeader(),
@@ -126,7 +120,7 @@ export class PresentationGenerationApi {
   static async generatePresentation(presentationData: any) {
     try {
       const response = await fetch(
-        `${BASE_URL}/ppt/generate`,
+        `/api/v1/ppt/generate`,
         {
           method: "POST",
           headers: getHeader(),
@@ -155,7 +149,7 @@ export class PresentationGenerationApi {
   ) {
     try {
       const response = await fetch(
-        `${BASE_URL}/ppt/edit`,
+        `/api/v1/ppt/edit`,
         {
           method: "POST",
           headers: getHeader(),
@@ -184,7 +178,7 @@ export class PresentationGenerationApi {
   static async updatePresentationContent(body: any) {
     try {
       const response = await fetch(
-        `${BASE_URL}/ppt/slides/update`,
+        `/api/v1/ppt/slides/update`,
         {
           method: "POST",
           headers: getHeader(),
@@ -210,7 +204,7 @@ export class PresentationGenerationApi {
   static async generateData(presentationData: any) {
     try {
       const response = await fetch(
-        `${BASE_URL}/ppt/generate/data`,
+        `/api/v1/ppt/generate/data`,
         {
           method: "POST",
           headers: getHeader(),
@@ -234,7 +228,7 @@ export class PresentationGenerationApi {
   static async imageSearch(imageSearch: ImageSearch) {
     try {
       const response = await fetch(
-        `${BASE_URL}/ppt/image/search`,
+        `/api/v1/ppt/image/search`,
         {
           method: "POST",
           headers: getHeader(),
@@ -256,7 +250,7 @@ export class PresentationGenerationApi {
   static async generateImage(imageGenerate: ImageGenerate) {
     try {
       const response = await fetch(
-        `${BASE_URL}/ppt/image/generate`,
+        `/api/v1/ppt/image/generate`,
         {
           method: "POST",
           headers: getHeader(),
@@ -279,7 +273,7 @@ export class PresentationGenerationApi {
   static async searchIcons(iconSearch: IconSearch) {
     try {
       const response = await fetch(
-        `${BASE_URL}/ppt/icon/search`,
+        `/api/v1/ppt/icon/search`,
         {
           method: "POST",
           headers: getHeader(),
@@ -303,7 +297,7 @@ export class PresentationGenerationApi {
   static async updateDocuments(body: any) {
     try {
       const response = await fetch(
-        `${BASE_URL}/ppt/document/update`,
+        `/api/v1/ppt/document/update`,
         {
           method: "POST",
           headers: getHeaderForFormData(),
@@ -327,7 +321,7 @@ export class PresentationGenerationApi {
   static async exportAsPPTX(presentationData: any) {
     try {
       const response = await fetch(
-        `${BASE_URL}/ppt/presentation/export_as_pptx`,
+        `/api/v1/ppt/presentation/export_as_pptx`,
         {
           method: "POST",
           headers: getHeader(),
@@ -336,12 +330,7 @@ export class PresentationGenerationApi {
         }
       );
       if (response.ok) {
-        const data = await response.json();
-
-        return {
-          ...data,
-          url: `${BASE_URL}${data.url}`,
-        };
+        return await response.json();
       } else {
         throw new Error(`Failed to export as pptx: ${response.statusText}`);
       }
@@ -353,7 +342,7 @@ export class PresentationGenerationApi {
   static async exportAsPDF(presentationData: any) {
     try {
       const response = await fetch(
-        `${BASE_URL}/ppt/presentation/export_as_pdf`,
+        `/api/v1/ppt/presentation/export_as_pdf`,
         {
           method: "POST",
           headers: getHeader(),
@@ -375,7 +364,7 @@ export class PresentationGenerationApi {
   static async deleteSlide(presentation_id: string, slide_id: string) {
     try {
       const response = await fetch(
-        `${BASE_URL}/ppt/slide/delete?presentation_id=${presentation_id}&slide_id=${slide_id}`,
+        `/api/v1/ppt/slide/delete?presentation_id=${presentation_id}&slide_id=${slide_id}`,
         {
           method: "DELETE",
           headers: getHeader(),
@@ -396,7 +385,7 @@ export class PresentationGenerationApi {
   static async setThemeColors(presentation_id: string, theme: any) {
     try {
       const response = await fetch(
-        `${BASE_URL}/ppt/presentation/theme`,
+        `/api/v1/ppt/presentation/theme`,
         {
           method: "POST",
           headers: getHeader(),
@@ -404,7 +393,7 @@ export class PresentationGenerationApi {
             presentation_id,
             theme,
           }),
-         
+
         }
       );
       if (response.ok) {
@@ -426,18 +415,18 @@ export class PresentationGenerationApi {
     documents,
     images,
     language,
-  
+
   }: {
     prompt: string;
     n_slides: number | null;
     documents?: string[];
     images?: string[];
     language: string | null;
-    
+
   }) {
     try {
       const response = await fetch(
-        `${BASE_URL}/ppt/create`,
+        `/api/v1/ppt/create`,
         {
           method: "POST",
           headers: getHeader(),
@@ -447,7 +436,7 @@ export class PresentationGenerationApi {
             language,
             documents,
             images,
-           
+
           }),
           cache: "no-cache",
         }

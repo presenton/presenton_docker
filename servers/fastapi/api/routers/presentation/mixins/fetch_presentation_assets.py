@@ -21,7 +21,11 @@ class FetchPresentationAssetsMixin:
                                 "http://localhost:3000/static", ""
                             )
                             image_path = "/app" + image_path
-                            print(image_path)
+                        elif image_path.startswith("http://localhost/static"):
+                            image_path = image_path.replace(
+                                "http://localhost/static", ""
+                            )
+                            image_path = "/app" + image_path
                         else:
                             image_urls.append(image_path)
                             parsed_url = unquote(urlparse(image_path).path)

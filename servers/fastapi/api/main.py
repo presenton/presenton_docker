@@ -32,5 +32,4 @@ async def update_env_middleware(request: Request, call_next):
     update_env_with_user_config()
     return await call_next(request)
 
-
 app.include_router(presentation_router)

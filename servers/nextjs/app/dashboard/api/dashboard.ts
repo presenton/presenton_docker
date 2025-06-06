@@ -2,11 +2,7 @@ import {
   getHeader,
   getHeaderForFormData,
 } from "@/app/(presentation-generator)/services/api/header";
-import { getEnv } from "@/utils/constant";
 
-
-const urls = getEnv();
-const BASE_URL = urls.BASE_URL;
 
 
 export interface PresentationResponse {
@@ -31,7 +27,7 @@ export class DashboardApi {
   static async getPresentations(): Promise<PresentationResponse[]> {
     try {
       const response = await fetch(
-        `${BASE_URL}/ppt/user_presentations`,
+        `/api/v1/ppt/user_presentations`,
         {
           method: "GET",
         }
@@ -52,7 +48,7 @@ export class DashboardApi {
   static async getPresentation(id: string) {
     try {
       const response = await fetch(
-        `${BASE_URL}/ppt/presentation?presentation_id=${id}`,
+        `/api/v1/ppt/presentation?presentation_id=${id}`,
         {
           method: "GET",
 
@@ -71,7 +67,7 @@ export class DashboardApi {
   static async deletePresentation(presentation_id: string) {
     try {
       const response = await fetch(
-        `${BASE_URL}/ppt/delete?presentation_id=${presentation_id}`,
+        `/api/v1/ppt/delete?presentation_id=${presentation_id}`,
         {
           method: "DELETE",
           headers: getHeader(),
@@ -94,7 +90,7 @@ export class DashboardApi {
     formData.append("thumbnail", file);
     try {
       const response = await fetch(
-        `${BASE_URL}/ppt/presentation/thumbnail`,
+        `/api/v1/ppt/presentation/thumbnail`,
         {
           method: "POST",
           headers: getHeaderForFormData(),

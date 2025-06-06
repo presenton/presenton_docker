@@ -27,7 +27,6 @@ import { jsonrepair } from "jsonrepair";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 import Help from "./Help";
-import { getEnv } from "@/utils/constant";
 
 
 // Custom debounce function
@@ -52,8 +51,6 @@ function useDebounce<T extends (...args: any[]) => void>(
 }
 
 const PresentationPage = ({ presentation_id }: { presentation_id: string }) => {
-  const urls = getEnv();
-  const BASE_URL = urls.BASE_URL;
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const [selectedSlide, setSelectedSlide] = useState(0);
@@ -134,7 +131,7 @@ const PresentationPage = ({ presentation_id }: { presentation_id: string }) => {
       dispatch(setStreaming(true));
 
       evtSource = new EventSource(
-        `${BASE_URL}/ppt/generate/stream?presentation_id=${presentation_id}&session=${session}`
+        `/api/v1/ppt/generate/stream?presentation_id=${presentation_id}&session=${session}`
       );
 
       evtSource.onopen = () => {

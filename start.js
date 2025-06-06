@@ -12,7 +12,6 @@ const fastapiPort = 8000;
 const nextjsPort = 3000;
 
 process.env.USER_CONFIG_PATH = path.join(process.env.APP_DATA_DIRECTORY || "/app", 'userConfig.json');
-process.env.NEXT_PUBLIC_FAST_API = `http://${localhost}:${fastapiPort}`;
 
 const setupUserConfigFromEnv = () => {
   const userConfigPath = process.env.USER_CONFIG_PATH;
