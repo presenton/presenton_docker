@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:  
-      # Replace 5000 to with port of your choice
+      # You can replace 5000 with any other port number of your choice to run Presenton on a different port number.
       - "5000:80"
     volumes:  
       - ./user_data:/app/user_data

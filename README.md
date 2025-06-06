@@ -36,7 +36,7 @@ docker run -it --name presenton -p 5000:80 -v "${PWD}\user_data:/app/user_data" 
 #### 2. Open Presenton
 Open http://localhost:5000 on browser of your choice to use Presenton.
 
-> **Note: You can run Presenton on different port just by replacing 5000 with any other port number.**
+> **Note: You can replace 5000 with any other port number of your choice to run Presenton on a different port number.**
 
 ## Features
 
