@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File;
-    
+
     if (!file) {
       return NextResponse.json(
         { error: "No file provided" },
@@ -33,9 +33,9 @@ export async function POST(request: NextRequest) {
     fs.writeFileSync(filePath, buffer);
 
     // Return the relative path that can be used in the frontend
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
-      filePath: `/app/user_data/uploads/${filename}` 
+      filePath: `/app/user_data/uploads/${filename}`
     });
   } catch (error) {
     console.error("Error saving image:", error);

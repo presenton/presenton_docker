@@ -3,10 +3,15 @@ FROM python:3.11-slim-bookworm
 # Install Node.js and npm
 RUN apt-get update && apt-get install -y \
     nodejs \  
-    npm
-  
+    npm \
+    nginx
+
 # Create a working directory
 WORKDIR /app  
+
+# Set environment variables
+ENV APP_DATA_DIRECTORY=/app/user_data
+ENV TEMP_DIRECTORY=/tmp/presenton
 
 # Install dependencies for FastAPI
 COPY servers/fastapi/requirements.txt ./
@@ -26,10 +31,8 @@ WORKDIR /app
 # Copy Next.js app
 COPY servers/nextjs/ ./servers/nextjs/
 
-# Build the Next.js app with environment variables
+# Build the Next.js app
 WORKDIR /app/servers/nextjs
-ARG FASTAPI_URL=http://0.0.0.0:8000
-ENV NEXT_PUBLIC_FAST_API=${FASTAPI_URL}
 RUN npm run build
 
 WORKDIR /app
@@ -38,13 +41,12 @@ WORKDIR /app
 COPY servers/fastapi/ ./servers/fastapi/
 COPY start.js LICENSE NOTICE ./
 
-ENV APP_DATA_DIRECTORY=/app/user_data
-ENV TEMP_DIRECTORY=/tmp/presenton
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/nginx.conf
 
 
-
-# Expose the ports for Next.js and FastAPI
-EXPOSE 3000 8000
+# Expose the port
+EXPOSE 80
 
 # Start the servers
-CMD ["node", "start.js"]
+CMD service nginx start && node start.js

@@ -4,13 +4,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        - FASTAPI_URL=${FASTAPI_URL:-http://0.0.0.0:8000}
-    environment:
-      - FASTAPI_URL=${FASTAPI_URL:-http://0.0.0.0:8000}
     ports:  
-      - "3000:3000"
-      - "8000:8000"
+      # Replace 5000 to with port of your choice
+      - "5000:80"
     volumes:  
       - ./user_data:/app/user_data
 

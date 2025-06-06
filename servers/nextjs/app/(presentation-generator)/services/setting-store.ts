@@ -1,21 +1,26 @@
 import path from 'path';
 import fs from 'fs';
 
-const userDataDir = process.env.USER_DATA_DIR || '/tmp';
 class SettingsStore {
-  private settingsPath: string;
+  private settingsPath: string | undefined;
   private settings: { [key: string]: any };
 
   constructor() {
-    this.settingsPath = path.join(userDataDir, 'settings.json');
     this.settings = {};
     this.loadSettings();
   }
 
+  private getSettingsPath() {
+    if (this.settingsPath) return this.settingsPath;
+    this.settingsPath = path.join(process.env.APP_DATA_DIRECTORY!, 'settings.json');
+    return this.settingsPath;
+  }
+
   private loadSettings() {
     try {
-      if (fs.existsSync(this.settingsPath)) {
-        const data = fs.readFileSync(this.settingsPath, 'utf-8');
+      const settingsPath = this.getSettingsPath();
+      if (fs.existsSync(settingsPath)) {
+        const data = fs.readFileSync(settingsPath, 'utf-8');
         this.settings = JSON.parse(data);
 
       } else {
@@ -31,13 +36,15 @@ class SettingsStore {
 
   private saveSettings() {
     try {
-      fs.writeFileSync(this.settingsPath, JSON.stringify(this.settings, null, 2));
+      const settingsPath = this.getSettingsPath();
+      fs.writeFileSync(settingsPath, JSON.stringify(this.settings, null, 2));
 
     } catch (error) {
       console.error('Error saving settings:', error);
       throw error;
     }
   }
+
 
   get(key: string, defaultValue: any = null): any {
     const value = this.settings[key];
