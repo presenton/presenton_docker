@@ -248,6 +248,13 @@ const UploadPage = () => {
         description: "Please try again.",
         variant: "destructive",
       });
+      setLoadingState({
+        isLoading: false,
+        message: "",
+        showProgress: false,
+        duration: 0,
+      });
+
     }
   };
 
