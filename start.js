@@ -7,14 +7,23 @@ const fs = require('fs');
 const fastapiDir = path.join(__dirname, 'servers/fastapi');
 const nextjsDir = path.join(__dirname, 'servers/nextjs');
 
+const isDev = process.env.NODE_ENV === 'development';
+
 const localhost = '0.0.0.0';
 const fastapiPort = 8000;
 const nextjsPort = 3000;
 
-process.env.USER_CONFIG_PATH = path.join(process.env.APP_DATA_DIRECTORY || "/app", 'userConfig.json');
+process.env.USER_CONFIG_PATH = path.join(process.env.APP_DATA_DIRECTORY, 'userConfig.json');
 
 const setupUserConfigFromEnv = () => {
   const userConfigPath = process.env.USER_CONFIG_PATH;
+  const userDataDir = path.dirname(userConfigPath);
+
+  // Create user_data directory if it doesn't exist
+  if (!fs.existsSync(userDataDir)) {
+    fs.mkdirSync(userDataDir, { recursive: true });
+  }
+
   let existingConfig = {};
   if (fs.existsSync(userConfigPath)) {
     existingConfig = JSON.parse(fs.readFileSync(userConfigPath, 'utf8'));
@@ -31,7 +40,7 @@ const startServers = async () => {
 
   const fastApiProcess = spawn(
     "python",
-    ["server.py", "--port", fastapiPort.toString()],
+    [isDev ? "server_autoreload.py" : "server.py", "--port", fastapiPort.toString()],
     {
       cwd: fastapiDir,
       stdio: "inherit",
@@ -48,7 +57,7 @@ const startServers = async () => {
 
   const nextjsProcess = spawn(
     "npm",
-    ["run", "start", "--", "-p", nextjsPort.toString()],
+    ["run", isDev ? "dev" : "start", "--", "-p", nextjsPort.toString()],
     {
       cwd: nextjsDir,
       stdio: "inherit",

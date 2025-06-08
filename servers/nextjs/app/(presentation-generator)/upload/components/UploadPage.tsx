@@ -17,7 +17,7 @@ import { useDispatch } from "react-redux";
 import {
   setError,
   setPresentationId,
-  setTitles,
+  setOutlines,
 } from "@/store/slices/presentationGeneration";
 import { ConfigurationSelects } from "./ConfigurationSelects";
 import { PromptInput } from "./PromptInput";
@@ -235,11 +235,11 @@ const UploadPage = () => {
     });
 
     try {
-      const titlePromise = await PresentationGenerationApi.titleGeneration({
+      const presentationWithOutlines = await PresentationGenerationApi.titleGeneration({
         presentation_id: createResponse.id,
       });
-      dispatch(setPresentationId(titlePromise.id));
-      dispatch(setTitles(titlePromise.titles));
+      dispatch(setPresentationId(presentationWithOutlines.id));
+      dispatch(setOutlines(presentationWithOutlines.outlines));
       router.push("/theme");
     } catch (error) {
       console.error("Error in title generation:", error);

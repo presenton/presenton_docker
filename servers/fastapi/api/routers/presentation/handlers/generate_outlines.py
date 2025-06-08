@@ -1,17 +1,17 @@
 import uuid
+import re
 
 from api.models import LogMetadata
-from api.routers.presentation.models import GenerateTitleRequest
+from api.routers.presentation.models import GenerateOutlinesRequest
 from api.services.instances import temp_file_service
 from api.services.logging import LoggingService
 from api.sql_models import PresentationSqlModel
-from ppt_config_generator.models import PresentationTitlesModel
-from ppt_config_generator.ppt_title_summary_generator import generate_ppt_titles
+from ppt_config_generator.ppt_outlines_generator import generate_ppt_content
 from api.services.database import get_sql_session
 
 
-class PresentationTitlesGenerateHandler:
-    def __init__(self, data: GenerateTitleRequest):
+class PresentationOutlinesGenerateHandler:
+    def __init__(self, data: GenerateOutlinesRequest):
         self.data = data
 
         self.session = str(uuid.uuid4())
@@ -32,15 +32,18 @@ class PresentationTitlesGenerateHandler:
                 PresentationSqlModel, self.data.presentation_id
             )
 
-            presentation_titles: PresentationTitlesModel = await generate_ppt_titles(
+            presentation_content = await generate_ppt_content(
                 presentation.prompt,
                 presentation.n_slides,
-                presentation.summary,
                 presentation.language,
+                presentation.summary,
             )
 
-            presentation.title = presentation_titles.presentation_title
-            presentation.titles = presentation_titles.titles
+            presentation.title = presentation_content.title
+            presentation.outlines = [
+                each.model_dump() for each in presentation_content.slides
+            ]
+            presentation.notes = presentation_content.notes
 
             sql_session.commit()
             sql_session.refresh(presentation)

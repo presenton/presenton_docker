@@ -10,3 +10,13 @@ services:
     volumes:  
       - ./user_data:/app/user_data
 
+  presenton-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5000:80"
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=development

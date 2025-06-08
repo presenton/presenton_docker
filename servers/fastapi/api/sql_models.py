@@ -3,8 +3,6 @@ from typing import List, Optional
 import uuid
 from sqlmodel import SQLModel, Field, Column, JSON
 
-from ppt_generator.models.other_models import SlideType
-
 
 def get_random_uuid() -> str:
     return str(uuid.uuid4())
@@ -18,7 +16,10 @@ class PresentationSqlModel(SQLModel, table=True):
     theme: Optional[dict] = Field(sa_column=Column(JSON, nullable=True), default=None)
     file: Optional[str] = None
     title: Optional[str] = None
-    titles: Optional[List[str]] = Field(
+    notes: Optional[List[str]] = Field(
+        sa_column=Column(JSON, nullable=True), default=None
+    )
+    outlines: Optional[List[dict]] = Field(
         sa_column=Column(JSON, nullable=True), default=None
     )
     language: Optional[str] = None

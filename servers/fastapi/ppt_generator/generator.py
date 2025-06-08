@@ -1,17 +1,19 @@
 import os
-from typing import AsyncIterator, List
+from typing import AsyncIterator, List, Optional
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessageChunk
+from ppt_config_generator.models import SlideMarkdownModel
 from ppt_generator.models.llm_models import LLMPresentationModel
 
 CREATE_PRESENTATION_PROMPT = """
                 You're a professional presenter with years of experience in creating clear and engaging presentations. 
 
-                Create a presentation using the provided slide titles, images, and additional data, following specified steps and guidelines. 
+                Create a presentation using the provided title, slide titles and body following specified steps and guidelines. 
 
-                Analyze all inputs, including slide titles, graphs, summary, big idea, story and spreadsheet content to construct each slide with appropriate content and format.
+                Analyze all inputs, to construct each slide with appropriate content and format.
+
 
                 # Slide Types
                 - **1**: contains title, description and image.
@@ -23,25 +25,17 @@ CREATE_PRESENTATION_PROMPT = """
                 - **8**: contains title, description and list of items with icons.
 
                 # Steps
-                1. Analyze Prompt, and other provided data.
-                2. Use Slide titles provided in **Titles**.
-                3. Generate Slide Content for each slide. Make sure it has all the context and information required to create this individual slide from.
-                4. Select slide type.
-                5. Output should be in json format as per given schema.
-                6. **Adherence to schema should be beyond all the rules mentioned in notes.**
+                1. Analyze provided presentation title, slide titles and body.
+                2. Select slide type for each slide.
+                3. Output should be in json format as per given schema.
+                4. **Adherence to schema should be beyond all the rules mentioned in notes.**
 
                 # Notes
                 - Generate output in language mentioned in *Input*.
-                - Distribute contexts mentioned in prompt to slides using **info** field.
-                - User prompt should be respected beyond all rules or constraints.
-                - If the presentation is academic, then make only take the chapter text as context and create presentation according to that text and structure. Don't assume or put text or context which is not in the text.
-                - If **Story** is provided, presentation should follow the story flow.
-                - When you have to express single numbers like percentage or figures, you should use inforgraphics but for a collection of numbers in series you can use charts. 
                 - Freely select type with images and icons.
                 - Introduction and Conclusion should have *Type 1* if graph is not assigned.
                 - Try to select **different types for every slides**.
                 - Don't select Type **3** for any slide.
-                - Make sure to give presentation in said language. You must translate and understand given context and text is in any other language.
                 - Do not include same graph twice in presentation without any changes to the other.
                 - Every series in a graph should have data in same unit. Example: all series should be in percentage or all series should be in number of items.
                 - Type **9** and **5** should be only picked if graph is available.
@@ -67,16 +61,15 @@ CREATE_PRESENTATION_PROMPT = """
                         - Second one should be more generic that first like "bulb".
                         - Third one should be simplest like "light".
 
+                **Follow the all the length constraints provided in the schema and notes.**
                 **Go through notes and steps and make sure they are all followed. Rule breaks are strictly not allowed.**
 """
 
 
 def generate_presentation_stream(
-    titles: List[str],
-    prompt: str,
-    n_slides: int,
-    language: str,
-    summary: str,
+    title: str,
+    notes: Optional[List[str]],
+    outlines: List[SlideMarkdownModel],
 ) -> AsyncIterator[AIMessageChunk]:
 
     schema = LLMPresentationModel.model_json_schema()
@@ -84,8 +77,18 @@ def generate_presentation_stream(
     system_prompt = f"{CREATE_PRESENTATION_PROMPT} -|0|--|0|- Follow this schema while giving out response: {schema}. Make description short and obey the character limits. Output should be in JSON format. Give out only JSON, nothing else."
     system_prompt = SystemMessage(system_prompt.replace("-|0|-", "\n"))
 
-    user_message = f"Prompt: {prompt}-|0|--|0|- Number of Slides: {n_slides}-|0|--|0|- Presentation Language: {language} -|0|--|0|- Slide Titles: {titles} -|0|--|0|- Reference Document: {summary}"
-    user_message = HumanMessage(user_message.replace("-|0|-", "\n"))
+    user_message = f"# Presentation Title: {title} \n\n"
+    for i, slide in enumerate(outlines):
+        user_message += f"## Slide {i+1}:\n"
+        user_message += f"  - Title: {slide.title} \n"
+        user_message += f"  - Body: {slide.body} \n\n"
+
+    if notes:
+        user_message += f"# Notes: \n"
+        for note in notes:
+            user_message += f"  - {note} \n"
+
+    user_message = HumanMessage(user_message)
 
     model = (
         ChatOpenAI(model="gpt-4.1")

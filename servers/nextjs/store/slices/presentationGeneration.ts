@@ -17,6 +17,11 @@ export interface ChartSettings {
   dataLabel: DataLabel;
 }
 
+export interface SlideOutline {
+  title: string;
+  body: string;
+}
+
 export interface Chart {
   id: string;
   name: string;
@@ -56,7 +61,7 @@ interface PresentationGenerationState {
   images: string[];
   isLoading: boolean;
   isStreaming: boolean | null;
-  titles: string[];
+  outlines: SlideOutline[];
   error: string | null;
   presentationData: PresentationData | null;
 }
@@ -65,7 +70,7 @@ const initialState: PresentationGenerationState = {
   presentation_id: null,
   documents: [],
   images: [],
-  titles: [],
+  outlines: [],
   isLoading: false,
   isStreaming: null,
   error: null,
@@ -107,18 +112,18 @@ const presentationGenerationSlice = createSlice({
     setImgs: (state, action: PayloadAction<string[]>) => {
       state.images = action.payload;
     },
-    // Set title with charts
-    setTitles: (state, action: PayloadAction<string[]>) => {
-      state.titles = action.payload;
+    // Set outlines
+    setOutlines: (state, action: PayloadAction<SlideOutline[]>) => {
+      state.outlines = action.payload;
     },
     // Set presentation data
     setPresentationData: (state, action: PayloadAction<PresentationData>) => {
       state.presentationData = action.payload;
     },
-    deleteTitle: (state, action: PayloadAction<{ index: number }>) => {
-      if (state.titles) {
+    deleteSlideOutline: (state, action: PayloadAction<{ index: number }>) => {
+      if (state.outlines) {
         // Remove the slide at the given index
-        state.titles = state.titles.filter(
+        state.outlines = state.outlines.filter(
           (_, idx) => idx !== action.payload.index
         );
       }
@@ -428,9 +433,9 @@ export const {
   setDocs,
   setImgs,
 
-  deleteTitle,
+  deleteSlideOutline,
   setPresentationData,
-  setTitles,
+  setOutlines,
   // slides operations
   addSlide,
   updateSlide,

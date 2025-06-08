@@ -3,34 +3,35 @@ import { CSS } from "@dnd-kit/utilities"
 import { Trash2 } from "lucide-react"
 import { RootState } from "@/store/store"
 import { useDispatch, useSelector } from "react-redux"
-import { deleteTitle, setTitles } from "@/store/slices/presentationGeneration"
+import { deleteSlideOutline, setOutlines, SlideOutline } from "@/store/slices/presentationGeneration"
 import ToolTip from "@/components/ToolTip"
+import MarkdownRenderer from "../../documents-preview/components/MarkdownRenderer"
 interface OutlineItemProps {
-    slideTitle: string
+    slideOutline: SlideOutline,
     index: number
 }
 
 export function OutlineItem({
     index,
-    slideTitle,
+    slideOutline,
 }: OutlineItemProps) {
     const {
         presentation_id,
-        titles,
+        outlines,
     } = useSelector((state: RootState) => state.presentationGeneration);
     const dispatch = useDispatch()
 
-    const handleSlideTitleChange = (newTitle: string) => {
+    const handleSlideChange = (newOutline: SlideOutline) => {
 
-        const newData = titles?.map((each, idx) => {
+        const newData = outlines?.map((each, idx) => {
             if (idx === index - 1) {
-                return newTitle
+                return newOutline
             }
             return each;
         });
 
         if (!newData) return;
-        dispatch(setTitles(newData));
+        dispatch(setOutlines(newData));
     }
 
 
@@ -42,7 +43,7 @@ export function OutlineItem({
         transform,
         transition,
         isDragging,
-    } = useSortable({ id: slideTitle })
+    } = useSortable({ id: slideOutline.title })
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -51,7 +52,7 @@ export function OutlineItem({
 
 
     const handleSlideDelete = () => {
-        dispatch(deleteTitle({ index: index - 1 }))
+        dispatch(deleteSlideOutline({ index: index - 1 }))
 
     }
 
@@ -79,15 +80,20 @@ export function OutlineItem({
                 </div>
 
                 {/* Main Title Input - Add onFocus handler */}
-                <input
-                    type="text"
-                    autoFocus
-                    value={slideTitle}
-                    onChange={(e) => handleSlideTitleChange(e.target.value)}
+                <div className="flex flex-col basis-full gap-2">
 
-                    className="text-sm sm:text-base flex-1 font-medium bg-transparent outline-none"
-                    placeholder="Title goes here"
-                />
+                    <input
+                        type="text"
+                        value={slideOutline.title}
+                        onChange={(e) => handleSlideChange({ ...slideOutline, title: e.target.value })}
+
+                        className="text-md sm:text-lg flex-1 font-semibold bg-transparent outline-none"
+                        placeholder="Title goes here"
+                    />
+
+                    {/* Main Description Input - Add onFocus handler */}
+                    <MarkdownRenderer content={slideOutline.body} />
+                </div>
 
                 {/* Action Buttons */}
                 <div className="flex gap-1 sm:gap-2 items-center">

@@ -53,7 +53,8 @@ class PresentationGenerateStreamHandler:
         self.presentation_id = self.data.presentation_id
         self.theme = self.data.theme
         self.images = self.data.images
-        self.titles = self.data.titles
+        self.title = self.data.title
+        self.outlines = self.data.outlines
         self.watermark = self.data.watermark
 
         return StreamingResponse(
@@ -68,13 +69,13 @@ class PresentationGenerateStreamHandler:
             extra=log_metadata.model_dump(),
         )
 
-        if not self.titles:
-            raise HTTPException(400, "Titles can not be empty")
+        if not self.outlines:
+            raise HTTPException(400, "Outlines can not be empty")
 
         with get_sql_session() as sql_session:
             presentation = sql_session.get(PresentationSqlModel, self.presentation_id)
-            presentation.n_slides = len(self.titles)
-            presentation.titles = self.titles
+            presentation.outlines = [each.model_dump() for each in self.outlines]
+            presentation.title = self.title or presentation.title
             presentation.theme = self.theme
             sql_session.exec(
                 delete(SlideSqlModel).where(
@@ -89,12 +90,9 @@ class PresentationGenerateStreamHandler:
         ).to_string()
 
         presentation_text = ""
+
         async for chunk in generate_presentation_stream(
-            self.titles,
-            presentation.prompt or "create presentation",
-            presentation.n_slides,
-            presentation.language,
-            presentation.summary,
+            self.title, presentation.notes, self.outlines
         ):
             presentation_text += chunk.content
             yield SSEResponse(
