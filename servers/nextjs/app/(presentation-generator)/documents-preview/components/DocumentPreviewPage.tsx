@@ -92,7 +92,7 @@ const DocumentsPreviewPage: React.FC = () => {
 
   const maintainDocumentTexts = async () => {
     const newDocuments: string[] = [];
-    const promises: Promise<string>[] = [];
+    const promises: Promise<{ content: string }>[] = [];
 
     // Process documents
     documentKeys.forEach(key => {
@@ -112,7 +112,7 @@ const DocumentsPreviewPage: React.FC = () => {
         setTextContents(prev => {
           const newContents = { ...prev };
           newDocuments.forEach((key, index) => {
-            newContents[key] = results[index];
+            newContents[key] = results[index].content || "";
           });
           return newContents;
         });
