@@ -5,7 +5,9 @@ import { RootState } from "@/store/store"
 import { useDispatch, useSelector } from "react-redux"
 import { deleteSlideOutline, setOutlines, SlideOutline } from "@/store/slices/presentationGeneration"
 import ToolTip from "@/components/ToolTip"
-import MarkdownRenderer from "../../documents-preview/components/MarkdownRenderer"
+import MarkdownEditor from "../../components/MarkdownEditor"
+
+
 interface OutlineItemProps {
     slideOutline: SlideOutline,
     index: number
@@ -62,7 +64,7 @@ export function OutlineItem({
             <div
                 ref={setNodeRef}
                 style={style}
-                className={`flex items-center gap-2 md:gap-4 p-2 sm:pr-4 bg-[#F9F9F9] rounded-[8px] ${isDragging ? "opacity-50" : ""}`}
+                className={`flex items-start gap-2 md:gap-4 p-2 sm:pr-4 bg-[#F9F9F9] rounded-[8px] ${isDragging ? "opacity-50" : ""}`}
             >
                 {/* Drag Handle with Number - Make it smaller on mobile */}
                 <div
@@ -91,23 +93,16 @@ export function OutlineItem({
                         placeholder="Title goes here"
                     />
 
-                    {/* Main Description Input - Add onFocus handler */}
-                    <MarkdownRenderer content={slideOutline.body} />
+                    {/* Editable Markdown Content */}
+                    <MarkdownEditor
+                        content={slideOutline.body}
+                        onChange={(content) => handleSlideChange({ ...slideOutline, body: content })}
+                    />
                 </div>
 
                 {/* Action Buttons */}
                 <div className="flex gap-1 sm:gap-2 items-center">
-                    {/* <ToolTip content="Open Chart">
-                        <button
-                            onClick={() => {
-                                setIsChartOpen(!isChartOpen)
-                                setExpandedChart(!expandedChart)
-                            }}
-                            className={`p-1.5 sm:p-2 ${isChartOpen ? 'bg-[#E9E8F8]' : 'bg-[#EDEDED]'} hover:bg-[#E9E8F8] rounded-lg transition-colors`}
-                        >
-                            <ChartPie className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
-                        </button>
-                    </ToolTip> */}
+
                     <ToolTip content="Delete Slide">
                         <button
                             onClick={handleSlideDelete}
@@ -124,3 +119,4 @@ export function OutlineItem({
         </div>
     )
 }
+
