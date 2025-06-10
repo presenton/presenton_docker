@@ -45,4 +45,4 @@ COPY nginx.conf /etc/nginx/nginx.conf
 EXPOSE 80
 
 # Start the servers
-CMD ["service", "nginx", "start", "&&", "node", "/app/start.js"]
+CMD ["/bin/bash", "-c", "service nginx start && node /app/start.js"]

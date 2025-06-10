@@ -38,6 +38,19 @@ Open http://localhost:5000 on browser of your choice to use Presenton.
 
 > **Note: You can replace 5000 with any other port number of your choice to run Presenton on a different port number.**
 
+## Deployment Configurations
+
+You may want to directly provide you API KEYS as environment variables and keep them hidden for deployment. You can set these environment variables to achieve it.
+
+- **CAN_CHANGE_KEYS=[true/false]**: Set this to **false** if you want to keep API Keys hidden and make them unmodifiable.
+- **LLM=[openai/google]**: Select **LLM** of your choice.
+- **OPENAI_API_KEY=[Your OpenAI API key]**: Provide this if **LLM** is set to **openai**
+- **GOOGLE_API_KEY=[Your Google API Key]**: Provide this if **LLM** is set to **google**
+
+```bash
+docker run -it --name presenton -p 5000:80 -e LLM="openai" -e OPENAI_API_KEY="******" -e CAN_CHANGE_KEYS="false" -v "./user_data:/app/user_data" ghcr.io/presenton/presenton:latest
+```
+
 ## Features
 
 ### 1. Add prompt, select number of slides and language

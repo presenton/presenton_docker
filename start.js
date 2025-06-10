@@ -10,6 +10,11 @@ const nextjsDir = path.join(__dirname, 'servers/nextjs');
 const isDev = process.env.NODE_ENV === 'development';
 const canChangeKeys = process.env.CAN_CHANGE_KEYS !== 'false';
 
+console.log('process.env.CAN_CHANGE_KEYS', process.env.CAN_CHANGE_KEYS);
+console.log('process.env.LLM', process.env.LLM);
+console.log('process.env.OPENAI_API_KEY', process.env.OPENAI_API_KEY);
+console.log('process.env.GOOGLE_API_KEY', process.env.GOOGLE_API_KEY);
+
 const localhost = '0.0.0.0';
 const fastapiPort = 8000;
 const nextjsPort = 3000;
