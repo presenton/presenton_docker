@@ -1,5 +1,5 @@
 services:  
-  presenton:  
+  production:
     # image: ghcr.io/presenton/presenton:latest
     build:
       context: .
@@ -15,7 +15,7 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
 
-  presenton-dev:
+  development:
     build:
       context: .
       dockerfile: Dockerfile.dev
