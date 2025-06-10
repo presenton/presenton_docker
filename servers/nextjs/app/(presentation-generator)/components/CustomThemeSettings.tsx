@@ -114,6 +114,7 @@ const CustomThemeSettings = ({
         draftColors.slideDescription
       );
       root.style.setProperty("--custom-slide-box", draftColors.slideBox);
+      root.style.setProperty("--custom-icon-bg", draftColors.iconBg);
 
       // Save to file and API
       await Promise.all([
@@ -173,6 +174,7 @@ const CustomThemeSettings = ({
     { key: "slideHeading", label: "Heading Color", icon: "🔤" },
     { key: "slideDescription", label: "Description Color", icon: "📄" },
     { key: "slideBox", label: "Box Color", icon: "📦" },
+    { key: "iconBg", label: "Icon Background Color", icon: "📦" },
   ];
 
   return (

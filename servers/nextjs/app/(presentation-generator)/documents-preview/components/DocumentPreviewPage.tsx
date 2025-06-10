@@ -19,7 +19,7 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OverlayLoader } from "@/components/ui/overlay-loader";
 import { PresentationGenerationApi } from "../../services/api/presentation-generation";
-import { setTitles, setPresentationId } from "@/store/slices/presentationGeneration";
+import { setOutlines, setPresentationId } from "@/store/slices/presentationGeneration";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import { RootState } from "@/store/store";
@@ -92,7 +92,7 @@ const DocumentsPreviewPage: React.FC = () => {
 
   const maintainDocumentTexts = async () => {
     const newDocuments: string[] = [];
-    const promises: Promise<string>[] = [];
+    const promises: Promise<{ content: string }>[] = [];
 
     // Process documents
     documentKeys.forEach(key => {
@@ -112,7 +112,7 @@ const DocumentsPreviewPage: React.FC = () => {
         setTextContents(prev => {
           const newContents = { ...prev };
           newDocuments.forEach((key, index) => {
-            newContents[key] = results[index];
+            newContents[key] = results[index].content || "";
           });
           return newContents;
         });
@@ -158,12 +158,12 @@ const DocumentsPreviewPage: React.FC = () => {
       });
 
       try {
-        const titlePromise = await PresentationGenerationApi.titleGeneration({
+        const presentationWithOutlines = await PresentationGenerationApi.titleGeneration({
           presentation_id: createResponse.id,
         });
 
-        dispatch(setPresentationId(titlePromise.id));
-        dispatch(setTitles(titlePromise.titles));
+        dispatch(setPresentationId(presentationWithOutlines.id));
+        dispatch(setOutlines(presentationWithOutlines.outlines));
 
         setShowLoading({
           message: "",

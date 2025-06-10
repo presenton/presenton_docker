@@ -1,6 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel
 
+from ppt_config_generator.models import SlideMarkdownModel
 from ppt_generator.models.pptx_models import PptxPresentationModel
 from ppt_generator.models.query_and_prompt_models import (
     IconCategoryEnum,
@@ -33,7 +34,7 @@ class GeneratePresentationRequirementsRequest(BaseModel):
     images: Optional[List[str]] = None
 
 
-class GenerateTitleRequest(BaseModel):
+class GenerateOutlinesRequest(BaseModel):
     presentation_id: str
 
 
@@ -42,7 +43,8 @@ class PresentationGenerateRequest(BaseModel):
     theme: Optional[dict] = None
     images: Optional[List[str]] = None
     watermark: bool = True
-    titles: List[str]
+    outlines: List[SlideMarkdownModel]
+    title: Optional[str] = None
 
 
 class GenerateImageRequest(BaseModel):

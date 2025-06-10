@@ -10,6 +10,9 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { handleSaveLLMConfig, hasValidLLMConfig } from "@/utils/storeHelpers";
 
 interface ModelOption {
     value: string;
@@ -87,107 +90,48 @@ const PROVIDER_CONFIGS: Record<string, ProviderConfig> = {
     },
 };
 
-interface ConfigState {
-    provider: string;
-    apiKey: string;
-    textModel: string;
-    imageModel: string;
-}
-
 export default function Home() {
     const router = useRouter();
-    const [isLoading, setIsLoading] = useState(true);
-    const [config, setConfig] = useState<ConfigState>({
-        provider: "openai",
-        apiKey: "",
-        textModel: PROVIDER_CONFIGS.openai.textModels[0].value,
-        imageModel: PROVIDER_CONFIGS.openai.imageModels[0].value,
-    });
+    const config = useSelector((state: RootState) => state.userConfig);
+    const [llmConfig, setLlmConfig] = useState(config.llm_config);
 
-    useEffect(() => {
-        const checkExistingConfig = async () => {
-            try {
-                const savedConfig: UserConfig = await fetch('/api/user-config').then(res => res.json())
+    const canChangeKeys = config.can_change_keys;
 
-                // If either API key exists, redirect to upload
-                if (savedConfig?.OPENAI_API_KEY || savedConfig?.GOOGLE_API_KEY) {
-                    router.push('/upload');
-                } else {
-                    setIsLoading(false);
-                }
-            } catch (error) {
-                console.error("Error checking config:", error);
-                setIsLoading(false);
-            }
-        };
-
-        checkExistingConfig();
-    }, [router]);
-
-    if (isLoading) {
-        return (
-            <div className="min-h-screen bg-gradient-to-b font-instrument_sans from-gray-50 to-white flex items-center justify-center">
-                <div className="text-center">
-                    <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
-                    <p className="text-gray-600">Loading configuration...</p>
-                </div>
-            </div>
-        );
+    const api_key_changed = (newApiKey: string) => {
+        if (llmConfig.LLM === 'openai') {
+            setLlmConfig({ ...llmConfig, OPENAI_API_KEY: newApiKey });
+        } else {
+            setLlmConfig({ ...llmConfig, GOOGLE_API_KEY: newApiKey });
+        }
     }
 
-    const handleProviderChange = (provider: string) => {
-        setConfig((prev) => ({
-            ...prev,
-            provider,
-            textModel: PROVIDER_CONFIGS[provider].textModels[0].value,
-            imageModel: PROVIDER_CONFIGS[provider].imageModels[0].value,
-        }));
-    };
-
-    const handleConfigChange = (
-        field: keyof ConfigState,
-        value: string | number
-    ) => {
-        setConfig((prev) => ({
-            ...prev,
-            [field]: value,
-        }));
-    };
-
-    const currentProvider = PROVIDER_CONFIGS[config.provider];
     const handleSaveConfig = async () => {
-        if (!config.apiKey) {
-            toast({
-                title: "Error",
-                description: "Please enter an API key",
-            });
-            return;
-        }
-
         try {
-            // @ts-ignore
-            await fetch('/api/user-config', {
-                method: 'POST',
-                body: JSON.stringify({
-                    LLM: config.provider,
-                    [config.provider === 'openai' ? 'OPENAI_API_KEY' : 'GOOGLE_API_KEY']: config.apiKey
-                })
-            });
-
+            await handleSaveLLMConfig(llmConfig);
             toast({
-                title: "Configuration saved",
-                description: "You can now create presentations",
+                title: 'Success',
+                description: 'Configuration saved successfully',
             });
-
             router.push("/upload");
         } catch (error) {
-            console.error('Error saving configuration:', error);
+            console.error('Error:', error);
             toast({
-                title: "Error",
-                description: "Failed to save configuration",
+                title: 'Error',
+                description: 'Failed to save configuration',
             });
         }
     };
+
+
+    useEffect(() => {
+        if (!canChangeKeys) {
+            router.push("/upload");
+        }
+    }, []);
+
+    if (!canChangeKeys) {
+        return <></>;
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-b font-instrument_sans from-gray-50 to-white">
@@ -213,15 +157,15 @@ export default function Home() {
                             {Object.keys(PROVIDER_CONFIGS).map((provider) => (
                                 <button
                                     key={provider}
-                                    onClick={() => handleProviderChange(provider)}
-                                    className={`relative p-4 rounded-lg border-2 transition-all duration-200 ${config.provider === provider
+                                    onClick={() => setLlmConfig({ ...llmConfig, LLM: provider })}
+                                    className={`relative p-4 rounded-lg border-2 transition-all duration-200 ${llmConfig.LLM === provider
                                         ? "border-blue-500 bg-blue-50"
                                         : "border-gray-200 hover:border-blue-200 hover:bg-gray-50"
                                         }`}
                                 >
                                     <div className="flex items-center justify-center gap-3">
                                         <span
-                                            className={`font-medium text-center ${config.provider === provider
+                                            className={`font-medium text-center ${llmConfig.LLM === provider
                                                 ? "text-blue-700"
                                                 : "text-gray-700"
                                                 }`}
@@ -237,15 +181,15 @@ export default function Home() {
                     {/* API Key Input */}
                     <div className="mb-8">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            {config.provider.charAt(0).toUpperCase() +
-                                config.provider.slice(1)}{" "}
+                            {llmConfig.LLM!.charAt(0).toUpperCase() +
+                                llmConfig.LLM!.slice(1)}{" "}
                             API Key
                         </label>
                         <div className="relative">
                             <input
                                 type="text"
-                                value={config.apiKey}
-                                onChange={(e) => handleConfigChange("apiKey", e.target.value)}
+                                value={llmConfig.LLM === 'openai' ? llmConfig.OPENAI_API_KEY || '' : llmConfig.GOOGLE_API_KEY || ''}
+                                onChange={(e) => api_key_changed(e.target.value)}
                                 className="w-full px-4 py-2.5 outline-none border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
                                 placeholder="Enter your API key"
                             />
@@ -265,8 +209,8 @@ export default function Home() {
                                     Selected Models
                                 </h3>
                                 <p className="text-sm text-blue-700">
-                                    Using {currentProvider.textModels[0].label} for text
-                                    generation and {currentProvider.imageModels[0].label} for
+                                    Using {PROVIDER_CONFIGS[llmConfig.LLM!].textModels[0].label} for text
+                                    generation and {PROVIDER_CONFIGS[llmConfig.LLM!].imageModels[0].label} for
                                     images
                                 </p>
                                 <p className="text-sm text-blue-600 mt-2 opacity-75">
@@ -283,14 +227,14 @@ export default function Home() {
                                 <div className="flex items-start gap-3">
                                     <Info className="w-5 h-5 text-blue-600 mt-1" />
                                     <h3 className="text-lg font-medium text-gray-900">
-                                        {currentProvider.apiGuide.title}
+                                        {PROVIDER_CONFIGS[llmConfig.LLM!].apiGuide.title}
                                     </h3>
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent className="px-6 pb-6">
                                 <div className="space-y-4">
                                     <ol className="list-decimal list-inside space-y-2 text-gray-600">
-                                        {currentProvider.apiGuide.steps.map((step, index) => (
+                                        {PROVIDER_CONFIGS[llmConfig.LLM!].apiGuide.steps.map((step, index) => (
                                             <li key={index} className="text-sm">
                                                 {step}
                                             </li>
@@ -298,9 +242,9 @@ export default function Home() {
                                     </ol>
 
                                     <div className="flex flex-col sm:flex-row gap-4 mt-6">
-                                        {currentProvider.apiGuide.videoUrl && (
+                                        {PROVIDER_CONFIGS[llmConfig.LLM!].apiGuide.videoUrl && (
                                             <Link
-                                                href={currentProvider.apiGuide.videoUrl}
+                                                href={PROVIDER_CONFIGS[llmConfig.LLM!].apiGuide.videoUrl!}
                                                 target="_blank"
                                                 className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 transition-colors"
                                             >
@@ -310,7 +254,7 @@ export default function Home() {
                                             </Link>
                                         )}
                                         <Link
-                                            href={currentProvider.apiGuide.docsUrl}
+                                            href={PROVIDER_CONFIGS[llmConfig.LLM!].apiGuide.docsUrl}
                                             target="_blank"
                                             className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 transition-colors"
                                         >

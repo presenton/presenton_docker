@@ -1,6 +1,6 @@
 from typing import Annotated, List, Optional
 import uuid
-from fastapi import APIRouter, Body, File, UploadFile, Depends
+from fastapi import APIRouter, Body, File, UploadFile
 
 from api.models import SessionModel
 from api.request_utils import RequestUtils
@@ -26,8 +26,8 @@ from api.routers.presentation.handlers.generate_research_report import (
 from api.routers.presentation.handlers.generate_stream import (
     PresentationGenerateStreamHandler,
 )
-from api.routers.presentation.handlers.generate_titles import (
-    PresentationTitlesGenerateHandler,
+from api.routers.presentation.handlers.generate_outlines import (
+    PresentationOutlinesGenerateHandler,
 )
 from api.routers.presentation.handlers.get_presentation import GetPresentationHandler
 from api.routers.presentation.handlers.get_presentations import GetPresentationsHandler
@@ -58,7 +58,7 @@ from api.routers.presentation.models import (
     PresentationAndPath,
     PresentationAndPaths,
     PresentationAndSlides,
-    GenerateTitleRequest,
+    GenerateOutlinesRequest,
     PresentationAndUrls,
     PresentationGenerateRequest,
     SearchIconRequest,
@@ -160,14 +160,14 @@ async def create_presentation(
     )
 
 
-@presentation_router.post("/titles/generate", response_model=PresentationSqlModel)
-async def generate_titles(data: GenerateTitleRequest):
-    request_utils = RequestUtils(f"{route_prefix}/titles/generate")
+@presentation_router.post("/outlines/generate", response_model=PresentationSqlModel)
+async def generate_outlines(data: GenerateOutlinesRequest):
+    request_utils = RequestUtils(f"{route_prefix}/outlines/generate")
     logging_service, log_metadata = await request_utils.initialize_logger(
         presentation_id=data.presentation_id,
     )
     return await handle_errors(
-        PresentationTitlesGenerateHandler(data).post,
+        PresentationOutlinesGenerateHandler(data).post,
         logging_service,
         log_metadata,
     )

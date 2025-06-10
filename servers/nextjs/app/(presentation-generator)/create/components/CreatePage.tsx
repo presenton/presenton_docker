@@ -23,7 +23,7 @@ import { PresentationGenerationApi } from "../../services/api/presentation-gener
 import { useToast } from "@/hooks/use-toast";
 import {
   setPresentationData,
-  setTitles,
+  setOutlines,
 } from "@/store/slices/presentationGeneration";
 import { OverlayLoader } from "@/components/ui/overlay-loader";
 import Wrapper from "@/components/Wrapper";
@@ -31,7 +31,7 @@ import Wrapper from "@/components/Wrapper";
 const CreatePage = () => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const { presentation_id, images, titles } = useSelector(
+  const { presentation_id, images, outlines } = useSelector(
     (state: RootState) => state.presentationGeneration
   );
   const {
@@ -53,10 +53,10 @@ const CreatePage = () => {
   const [initialSlideCount, setInitialSlideCount] = useState(0);
 
   useEffect(() => {
-    if (titles && initialSlideCount === 0) {
-      setInitialSlideCount(titles.length);
+    if (outlines && initialSlideCount === 0) {
+      setInitialSlideCount(outlines.length);
     }
-  }, [titles]);
+  }, [outlines]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -68,20 +68,20 @@ const CreatePage = () => {
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
 
-    if (!active || !over || !titles) return;
+    if (!active || !over || !outlines) return;
 
     if (active.id !== over.id) {
       // Find the indices of the dragged and target items
-      const oldIndex = titles.findIndex((item) => item === active.id);
-      const newIndex = titles.findIndex((item) => item === over.id);
+      const oldIndex = outlines.findIndex((item) => item.title === active.id);
+      const newIndex = outlines.findIndex((item) => item.title === over.id);
 
       // Create new array with reordered items and updated indices
 
       // Reorder the array
-      const reorderedArray = arrayMove(titles, oldIndex, newIndex);
+      const reorderedArray = arrayMove(outlines, oldIndex, newIndex);
 
       // Update the store with new order
-      dispatch(setTitles(reorderedArray));
+      dispatch(setOutlines(reorderedArray));
     }
   };
 
@@ -104,7 +104,7 @@ const CreatePage = () => {
         },
         watermark: false,
         images: images,
-        titles: titles,
+        outlines: outlines,
 
       });
 
@@ -133,7 +133,7 @@ const CreatePage = () => {
   };
 
   const handleAddSlide = () => {
-    if (!titles) {
+    if (!outlines) {
       toast({
         title: "Error",
         description: "Cannot add slide at this time",
@@ -142,7 +142,7 @@ const CreatePage = () => {
       return;
     }
 
-    if (titles.length >= initialSlideCount) {
+    if (outlines.length >= initialSlideCount) {
       toast({
         title: "Cannot add more slides",
         description:
@@ -152,9 +152,9 @@ const CreatePage = () => {
       return;
     }
 
-    const newTitleWithCharts = [...titles, "New Slide"];
+    const newTitleWithCharts = [...outlines, { title: "New Slide", body: "" }];
 
-    dispatch(setTitles(newTitleWithCharts));
+    dispatch(setOutlines(newTitleWithCharts));
   };
 
   if (!presentation_id) {
@@ -182,19 +182,19 @@ const CreatePage = () => {
               onDragEnd={handleDragEnd}
             >
               <SortableContext
-                items={titles?.map((item) => ({ id: item })) || []}
+                items={outlines?.map((item) => ({ id: item.title })) || []}
                 strategy={verticalListSortingStrategy}
               >
-                {titles?.map((item, index) => (
-                  <OutlineItem key={item} index={index + 1} slideTitle={item} />
+                {outlines?.map((item, index) => (
+                  <OutlineItem key={item.title} index={index + 1} slideOutline={item} />
                 ))}
               </SortableContext>
             </DndContext>
             <Button
               variant="outline"
               onClick={handleAddSlide}
-              disabled={!titles || titles.length >= initialSlideCount}
-              className={`w-full mt-4 text-[#9034EA] border-[#9034EA] rounded-[32px] ${!titles || titles.length >= initialSlideCount
+              disabled={!outlines || outlines.length >= initialSlideCount}
+              className={`w-full mt-4 text-[#9034EA] border-[#9034EA] rounded-[32px] ${!outlines || outlines.length >= initialSlideCount
                 ? "opacity-50 cursor-not-allowed"
                 : ""
                 }`}

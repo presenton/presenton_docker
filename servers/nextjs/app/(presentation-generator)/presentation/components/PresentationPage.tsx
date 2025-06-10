@@ -89,7 +89,7 @@ const PresentationPage = ({ presentation_id }: { presentation_id: string }) => {
           console.error("Error AAYO", error);
         })
         .finally(() => {
-          console.log("Auto finished");
+
           setAutoSaveLoading(false);
         });
     },
@@ -170,7 +170,7 @@ const PresentationPage = ({ presentation_id }: { presentation_id: string }) => {
           }
         } else if (data.type === "complete") {
           try {
-            console.log("evtsource completer", data);
+
             dispatch(setPresentationData(data.presentation));
             dispatch(setStreaming(false));
             if (data.presentation.theme) {

@@ -8,6 +8,8 @@ from api.routers.presentation.router import presentation_router
 from api.services.database import sql_engine
 from api.utils import update_env_with_user_config
 
+can_change_keys = os.getenv("CAN_CHANGE_KEYS") != "false"
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
@@ -29,7 +31,9 @@ app.add_middleware(
 
 @app.middleware("http")
 async def update_env_middleware(request: Request, call_next):
-    update_env_with_user_config()
+    if can_change_keys:
+        update_env_with_user_config()
     return await call_next(request)
+
 
 app.include_router(presentation_router)

@@ -93,7 +93,7 @@ export class PresentationGenerationApi {
   }) {
     try {
       const response = await fetch(
-        `/api/v1/ppt/titles/generate`,
+        `/api/v1/ppt/outlines/generate`,
         {
           method: "POST",
           headers: getHeader(),

@@ -20,8 +20,8 @@ class PresentationGenerateDataHandler:
             extra=log_metadata.model_dump(),
         )
 
-        if not self.data.titles:
-            raise HTTPException(400, "Titles can not be empty")
+        if not self.data.outlines:
+            raise HTTPException(400, "Outlines can not be empty")
 
         key_value_model = KeyValueSqlModel(
             id=self.session,

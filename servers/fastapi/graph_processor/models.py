@@ -125,7 +125,7 @@ class GraphModel(BaseModel):
     type: GraphTypeEnum
     presentation: Optional[str] = None
     unit: Optional[str] = Field(
-        default="Unit of the data in the graph. Example: %, kg, million USD, tonnes, etc."
+        description="Unit of the data in the graph. Example: %, kg, million USD, tonnes, etc."
     )
     data: (
         PieChartDataModel

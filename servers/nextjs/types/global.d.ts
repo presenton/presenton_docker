@@ -13,7 +13,7 @@ interface TextFrameProps {
   // Add other properties as needed
 }
 
-interface UserConfig {
+interface LLMConfig {
   LLM?: string;
   OPENAI_API_KEY?: string;
   GOOGLE_API_KEY?: string;

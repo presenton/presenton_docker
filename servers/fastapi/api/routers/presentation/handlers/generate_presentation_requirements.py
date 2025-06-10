@@ -21,8 +21,6 @@ class GeneratePresentationRequirementsHandler:
         self.n_slides = data.n_slides
         self.documents = data.documents or []
         self.language = data.language
-        self.research_reports = data.research_reports or []
-        self.images = data.images or []
 
         self.session = str(uuid.uuid4())
         self.temp_dir = temp_file_service.create_temp_dir(self.session)
@@ -33,7 +31,7 @@ class GeneratePresentationRequirementsHandler:
             extra=log_metadata.model_dump(),
         )
 
-        all_document_paths = [*self.documents, *self.research_reports]
+        all_document_paths = [*self.documents]
 
         documents_loader = DocumentsLoader(all_document_paths)
         await documents_loader.load_documents(self.temp_dir)
