@@ -4,6 +4,10 @@ import Header from "../dashboard/components/Header";
 import Wrapper from "@/components/Wrapper";
 import { Settings, Key } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { RootState } from "@/store/store";
+import { useSelector } from "react-redux";
+import { handleSaveLLMConfig } from "@/utils/storeHelpers";
+import { useRouter } from "next/navigation";
 
 const PROVIDER_CONFIGS: Record<string, ProviderConfig> = {
     openai: {
@@ -25,59 +29,28 @@ interface ProviderConfig {
 }
 
 const SettingsPage = () => {
-    const [config, setConfig] = useState<UserConfig>({});
-    const [selectedProvider, setSelectedProvider] = useState<string>("openai");
-    const [isLoading, setIsLoading] = useState(true);
+    const router = useRouter();
 
-    useEffect(() => {
-        const loadConfig = async () => {
-            try {
-                const config = await fetch('/api/user-config').then(res => res.json())
-                setConfig(config);
-                if (config.LLM) {
-                    setSelectedProvider(config.LLM);
-                }
-            } catch (error) {
-                console.error("Error loading config:", error);
-                toast({
-                    title: 'Error',
-                    description: 'Failed to load configuration',
-                });
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    const userConfigState = useSelector((state: RootState) => state.userConfig);
+    const [llmConfig, setLlmConfig] = useState(userConfigState.llm_config);
+    const canChangeKeys = userConfigState.can_change_keys;
 
-        loadConfig();
-    }, []);
-
-    const handleSaveConfig = async (provider: string, apiKey: string) => {
-        if (apiKey === '') {
-            toast({
-                title: 'Error',
-                description: 'API key cannot be empty',
-            });
-            return;
+    const api_key_changed = (apiKey: string) => {
+        if (llmConfig.LLM === 'openai') {
+            setLlmConfig({ ...llmConfig, OPENAI_API_KEY: apiKey });
+        } else {
+            setLlmConfig({ ...llmConfig, GOOGLE_API_KEY: apiKey });
         }
+    }
 
+    const handleSaveConfig = async () => {
         try {
-            const newConfig = {
-                LLM: provider,
-                OPENAI_API_KEY: provider === 'openai' ? apiKey : config.OPENAI_API_KEY,
-                GOOGLE_API_KEY: provider === 'google' ? apiKey : config.GOOGLE_API_KEY
-            };
-
-            // @ts-ignore
-            await fetch('/api/user-config', {
-                method: 'POST',
-                body: JSON.stringify(newConfig)
-            });
-            setConfig(newConfig);
-
+            await handleSaveLLMConfig(llmConfig);
             toast({
                 title: 'Success',
                 description: 'Configuration saved successfully',
             });
+            router.back();
         } catch (error) {
             console.error('Error:', error);
             toast({
@@ -87,17 +60,14 @@ const SettingsPage = () => {
         }
     };
 
-    if (isLoading) {
-        return (
-            <div className="min-h-screen bg-[#E9E8F8]">
-                <Header />
-                <Wrapper className="lg:w-[60%]">
-                    <div className="py-8">
-                        <div className="text-center">Loading configuration...</div>
-                    </div>
-                </Wrapper>
-            </div>
-        );
+    useEffect(() => {
+        if (!canChangeKeys) {
+            router.push("/dashboard");
+        }
+    }, []);
+
+    if (!canChangeKeys) {
+        return <></>
     }
 
     return (
@@ -127,15 +97,15 @@ const SettingsPage = () => {
                                 {Object.keys(PROVIDER_CONFIGS).map((provider) => (
                                     <button
                                         key={provider}
-                                        onClick={() => setSelectedProvider(provider)}
-                                        className={`relative p-4 rounded-lg border-2 transition-all duration-200 ${selectedProvider === provider
+                                        onClick={() => setLlmConfig({ ...llmConfig, LLM: provider })}
+                                        className={`relative p-4 rounded-lg border-2 transition-all duration-200 ${llmConfig.LLM === provider
                                             ? "border-blue-500 bg-blue-50"
                                             : "border-gray-200 hover:border-blue-200 hover:bg-gray-50"
                                             }`}
                                     >
                                         <div className="flex items-center justify-center gap-3">
                                             <span
-                                                className={`font-medium text-center ${selectedProvider === provider
+                                                className={`font-medium text-center ${llmConfig.LLM === provider
                                                     ? "text-blue-700"
                                                     : "text-gray-700"
                                                     }`}
@@ -152,30 +122,24 @@ const SettingsPage = () => {
                         <div className="space-y-6">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    {PROVIDER_CONFIGS[selectedProvider].title}
+                                    {PROVIDER_CONFIGS[llmConfig.LLM!].title}
                                 </label>
                                 <div className="flex gap-3">
                                     <input
                                         type="text"
-                                        value={selectedProvider === 'openai' ? config.OPENAI_API_KEY || '' : config.GOOGLE_API_KEY || ''}
-                                        onChange={(e) => setConfig(prev => ({
-                                            ...prev,
-                                            [selectedProvider === 'openai' ? 'OPENAI_API_KEY' : 'GOOGLE_API_KEY']: e.target.value
-                                        }))}
+                                        value={llmConfig.LLM === 'openai' ? llmConfig.OPENAI_API_KEY || '' : llmConfig.GOOGLE_API_KEY || ''}
+                                        onChange={(e) => api_key_changed(e.target.value)}
                                         className="flex-1 px-4 py-2.5 border border-gray-300 outline-none rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-                                        placeholder={PROVIDER_CONFIGS[selectedProvider].placeholder}
+                                        placeholder={PROVIDER_CONFIGS[llmConfig.LLM!].placeholder}
                                     />
                                     <button
-                                        onClick={() => handleSaveConfig(
-                                            selectedProvider,
-                                            selectedProvider === 'openai' ? config.OPENAI_API_KEY || '' : config.GOOGLE_API_KEY || ''
-                                        )}
+                                        onClick={handleSaveConfig}
                                         className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                                     >
                                         Save
                                     </button>
                                 </div>
-                                <p className="mt-2 text-sm text-gray-500">{PROVIDER_CONFIGS[selectedProvider].description}</p>
+                                <p className="mt-2 text-sm text-gray-500">{PROVIDER_CONFIGS[llmConfig.LLM!].description}</p>
                             </div>
                         </div>
                     </div>

@@ -8,21 +8,24 @@ const fastapiDir = path.join(__dirname, 'servers/fastapi');
 const nextjsDir = path.join(__dirname, 'servers/nextjs');
 
 const isDev = process.env.NODE_ENV === 'development';
+const canChangeKeys = process.env.CAN_CHANGE_KEYS !== 'false';
 
 const localhost = '0.0.0.0';
 const fastapiPort = 8000;
 const nextjsPort = 3000;
 
-process.env.USER_CONFIG_PATH = path.join(process.env.APP_DATA_DIRECTORY, 'userConfig.json');
+const userConfigPath = path.join(process.env.APP_DATA_DIRECTORY, 'userConfig.json');
+const userDataDir = path.dirname(userConfigPath);
 
+// Create user_data directory if it doesn't exist
+if (!fs.existsSync(userDataDir)) {
+  fs.mkdirSync(userDataDir, { recursive: true });
+}
+
+process.env.USER_CONFIG_PATH = userConfigPath;
+
+//? UserConfig is only setup if API Keys can be changed
 const setupUserConfigFromEnv = () => {
-  const userConfigPath = process.env.USER_CONFIG_PATH;
-  const userDataDir = path.dirname(userConfigPath);
-
-  // Create user_data directory if it doesn't exist
-  if (!fs.existsSync(userDataDir)) {
-    fs.mkdirSync(userDataDir, { recursive: true });
-  }
 
   let existingConfig = {};
   if (fs.existsSync(userConfigPath)) {
@@ -33,6 +36,7 @@ const setupUserConfigFromEnv = () => {
     OPENAI_API_KEY: process.env.OPENAI_API_KEY || existingConfig.OPENAI_API_KEY,
     GOOGLE_API_KEY: process.env.GOOGLE_API_KEY || existingConfig.GOOGLE_API_KEY,
   };
+
   fs.writeFileSync(userConfigPath, JSON.stringify(userConfig));
 }
 
@@ -79,5 +83,7 @@ const startServers = async () => {
   process.exit(exitCode);
 };
 
-setupUserConfigFromEnv();
+if (canChangeKeys) {
+  setupUserConfigFromEnv();
+}
 startServers();

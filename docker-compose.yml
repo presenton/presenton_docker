@@ -9,14 +9,23 @@ services:
       - "5000:80"
     volumes:  
       - ./user_data:/app/user_data
+    environment:
+      - CAN_CHANGE_KEYS=${CAN_CHANGE_KEYS}
+      - LLM=${LLM}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
 
   presenton-dev:
     build:
       context: .
       dockerfile: Dockerfile.dev
     ports:
-      - "3000:80"
+      - "5000:80"
     volumes:
       - .:/app
     environment:
       - NODE_ENV=development
+      - CAN_CHANGE_KEYS=${CAN_CHANGE_KEYS}
+      - LLM=${LLM}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
