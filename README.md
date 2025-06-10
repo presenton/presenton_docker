@@ -40,7 +40,7 @@ Open http://localhost:5000 on browser of your choice to use Presenton.
 
 ## Deployment Configurations
 
-You may want to directly provide you API KEYS as environment variables and keep them hidden for deployment. You can set these environment variables to achieve it.
+You may want to directly provide your API KEYS as environment variables and keep them hidden for deployment. You can set these environment variables to achieve it.
 
 - **CAN_CHANGE_KEYS=[true/false]**: Set this to **false** if you want to keep API Keys hidden and make them unmodifiable.
 - **LLM=[openai/google]**: Select **LLM** of your choice.
