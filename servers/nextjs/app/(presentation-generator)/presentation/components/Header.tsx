@@ -247,34 +247,33 @@ const Header = ({
     }
   };
 
-  const ExportOptions = () => (
-    <div className="space-y-2 max-md:mt-4 bg-white rounded-lg">
+  const ExportOptions = ({ mobile }: { mobile: boolean }) => (
+    <div className={`space-y-2 max-md:mt-4 ${mobile ? "" : "bg-white"} rounded-lg`}>
       <Button
         onClick={handleExportPdf}
         variant="ghost"
-        className="pb-4 border-b rounded-none border-gray-300 w-full flex justify-start text-[#5146E5]"
-      >
+        className={`pb-4 border-b rounded-none border-gray-300 w-full flex justify-start text-[#5146E5] ${mobile ? "bg-white py-6 border-none rounded-lg" : ""}`} >
         <img src="/pdf.svg" alt="pdf export" width={30} height={30} />
         Export as PDF
       </Button>
       <Button
         onClick={handleExportPptx}
         variant="ghost"
-        className="w-full flex justify-start text-[#5146E5]"
+        className={`w-full flex justify-start text-[#5146E5] ${mobile ? "bg-white py-6" : ""}`}
       >
         <img src="/pptx.svg" alt="pptx export" width={30} height={30} />
         Export as PPTX
       </Button>
-      <p className="text-sm pt-3 border-t border-gray-300">
+      <p className={`text-sm pt-3 border-t border-gray-300 ${mobile ? "border-none text-white font-semibold" : ""}`}>
         Font Used:
-        <a className="text-blue-500  flex items-center gap-1" href={getFontLink(currentColors.fontFamily).link || ''} target="_blank" rel="noopener noreferrer">
+        <a className={`text-blue-500  flex items-center gap-1 ${mobile ? "mt-2 py-2 px-4 bg-white rounded-lg w-fit" : ""}`} href={getFontLink(currentColors.fontFamily).link || ''} target="_blank" rel="noopener noreferrer">
           {getFontLink(currentColors.fontFamily).name || ''} <ExternalLink className="w-4 h-4" />
         </a>
       </p>
     </div>
   );
 
-  const MenuItems = () => (
+  const MenuItems = ({ mobile }: { mobile: boolean }) => (
     <div className="flex flex-col lg:flex-row items-center gap-4">
       {/* Present Button */}
       <Button
@@ -291,20 +290,20 @@ const Header = ({
       <div className="hidden lg:block">
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-            <Button className="bg-white border py-5 text-[#5146E5] font-bold rounded-[32px] transition-all duration-500 hover:border hover:bg-[#5146E5] hover:text-white w-full">
+            <Button className={`border py-5 text-[#5146E5] font-bold rounded-[32px] transition-all duration-500 hover:border hover:bg-[#5146E5] hover:text-white w-full ${mobile ? "" : "bg-white"}`}>
               <SquareArrowOutUpRight className="w-4 h-4 mr-1" />
               Export
             </Button>
           </PopoverTrigger>
           <PopoverContent align="end" className="w-[250px] space-y-2 py-3 px-2">
-            <ExportOptions />
+            <ExportOptions mobile={false} />
           </PopoverContent>
         </Popover>
       </div>
 
       {/* Mobile Export Section */}
       <div className="lg:hidden flex flex-col w-full">
-        <ExportOptions />
+        <ExportOptions mobile={true} />
       </div>
     </div>
   );
@@ -358,7 +357,7 @@ const Header = ({
               presentationId={presentation_id}
             />
           </Modal>
-          <MenuItems />
+          <MenuItems mobile={false} />
           <UserAccount />
         </div>
 
@@ -391,7 +390,7 @@ const Header = ({
                     <SelectItem value="custom">Custom Theme</SelectItem>
                   </SelectContent>
                 </Select>
-                <MenuItems />
+                <MenuItems mobile={true} />
               </div>
             </SheetContent>
           </Sheet>
