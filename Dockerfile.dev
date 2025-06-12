@@ -31,7 +31,7 @@ RUN npx puppeteer browsers install chrome --install-deps
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Expose the port
-EXPOSE 80
+EXPOSE 80 3000 8000
 
 # Start the servers
 CMD ["/bin/bash", "-c", "service nginx start && node /app/start.js"]
