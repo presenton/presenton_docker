@@ -147,6 +147,10 @@ class PresentationAndPaths(BaseModel):
     paths: List[str]
 
 
+class PresentationPathAndEditPath(PresentationAndPath):
+    edit_path: str
+
+
 class UpdatePresentationTitlesRequest(BaseModel):
     presentation_id: str
     titles: List[str]

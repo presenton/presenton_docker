@@ -63,9 +63,9 @@ from api.routers.presentation.models import (
     PresentationAndPaths,
     PresentationAndSlides,
     GenerateOutlinesRequest,
-    PresentationAndUrl,
     PresentationAndUrls,
     PresentationGenerateRequest,
+    PresentationPathAndEditPath,
     SearchIconRequest,
     SearchImageRequest,
     UpdatePresentationThemeRequest,
@@ -327,7 +327,9 @@ async def delete_slide(slide_id: str, presentation_id: str):
     )
 
 
-@presentation_router.post("/generate/presentation", response_model=PresentationAndPath)
+@presentation_router.post(
+    "/generate/presentation", response_model=PresentationPathAndEditPath
+)
 async def generate_presentation(data: Annotated[GeneratePresentationRequest, Form()]):
     presentation_id = str(uuid.uuid4())
 

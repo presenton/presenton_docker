@@ -10,6 +10,7 @@ from api.routers.presentation.models import (
     ExportAsRequest,
     GeneratePresentationRequest,
     PresentationAndPath,
+    PresentationPathAndEditPath,
 )
 from api.services.database import get_sql_session
 from api.services.instances import temp_file_service
@@ -142,12 +143,9 @@ class GeneratePresentationHandler(FetchAssetsOnPresentationGenerationMixin):
             export_request_body["presentation_id"] = self.presentation_id
             export_request = ExportAsRequest(**export_request_body)
 
-            export_response = await ExportAsPptxHandler(export_request).post(
+            presentation_and_path = await ExportAsPptxHandler(export_request).post(
                 logging_service, log_metadata
             )
-            export_response.path = export_response.path.replace("app", "static")
-
-            return export_response
 
         else:
             print("-" * 40)
@@ -163,7 +161,13 @@ class GeneratePresentationHandler(FetchAssetsOnPresentationGenerationMixin):
                 ) as response:
                     response_json = await response.json()
 
-            return PresentationAndPath(
+            presentation_and_path = PresentationAndPath(
                 presentation_id=self.presentation_id,
                 path=response_json["path"].replace("app", "static"),
             )
+
+        presentation_and_path.path = presentation_and_path.path.replace("app", "static")
+        return PresentationPathAndEditPath(
+            **presentation_and_path.model_dump(),
+            edit_path=f"/presentation?id={self.presentation_id}",
+        )
