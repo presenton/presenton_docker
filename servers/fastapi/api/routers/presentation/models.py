@@ -1,5 +1,7 @@
-from typing import List, Optional
-from pydantic import BaseModel
+from enum import Enum
+from typing import List, Literal, Optional
+from fastapi import UploadFile
+from pydantic import BaseModel, Field
 
 from ppt_config_generator.models import SlideMarkdownModel
 from ppt_generator.models.pptx_models import PptxPresentationModel
@@ -9,6 +11,16 @@ from ppt_generator.models.query_and_prompt_models import (
 )
 from ppt_generator.models.slide_model import SlideModel
 from api.sql_models import PresentationSqlModel, SlideSqlModel
+
+
+class ThemeEnum(Enum):
+    DARK = "dark"
+    LIGHT = "light"
+    ROYAL_BLUE = "royal_blue"
+    CREAM = "cream"
+    LIGHT_RED = "light_red"
+    DARK_PINK = "dark_pink"
+    FAINT_YELLOW = "faint_yellow"
 
 
 class DocumentsAndImagesPath(BaseModel):
@@ -135,6 +147,19 @@ class PresentationAndPaths(BaseModel):
     paths: List[str]
 
 
+class PresentationPathAndEditPath(PresentationAndPath):
+    edit_path: str
+
+
 class UpdatePresentationTitlesRequest(BaseModel):
     presentation_id: str
     titles: List[str]
+
+
+class GeneratePresentationRequest(BaseModel):
+    prompt: str
+    n_slides: int = Field(default=8, ge=5, le=15)
+    language: str = Field(default="English")
+    theme: ThemeEnum = Field(default=ThemeEnum.LIGHT)
+    documents: Optional[List[UploadFile]] = None
+    export_as: Literal["pptx", "pdf"] = Field(default="pptx")

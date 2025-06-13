@@ -162,22 +162,8 @@ const Header = ({
         console.error(error);
       });
 
-    const metadata = await getSlideMetadata();
-
-    const slides = metadata.map((slide: any, index: any) => {
-      return {
-        shapes: slide.elements,
-      };
-    });
-
-    const apiBody = {
-      presentation_id: presentation_id,
-      pptx_model: {
-        background_color: metadata[0].backgroundColor,
-
-        slides: slides,
-      },
-    };
+    const apiBody = await getSlideMetadata();
+    apiBody.presentation_id = presentation_id;
 
     return apiBody;
   };

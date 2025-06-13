@@ -368,7 +368,7 @@ export async function POST(request: NextRequest) {
 
       try {
         const tempDir = process.env.TEMP_DIRECTORY || os.tmpdir();
-        
+
         // Generate a unique filename
         const filename = `chart-${graphId}-${Date.now()}.jpg`;
         const filePath = path.join(tempDir, filename);
@@ -388,9 +388,23 @@ export async function POST(request: NextRequest) {
         continue;
       }
     }
-
     await browser.close();
-    return NextResponse.json(metadata);
+
+
+    const slides = metadata.map((slide: any, index: any) => {
+      return {
+        shapes: slide.elements,
+      };
+    });
+
+    const apiBody = {
+      pptx_model: {
+        background_color: metadata[0].backgroundColor,
+        slides: slides,
+      },
+    };
+
+    return NextResponse.json(apiBody);
   } catch (error) {
     console.error("Error during page preparation:", error);
     if (browser) await browser.close();

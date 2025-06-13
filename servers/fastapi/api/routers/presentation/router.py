@@ -1,6 +1,6 @@
 from typing import Annotated, List, Optional
 import uuid
-from fastapi import APIRouter, Body, File, UploadFile
+from fastapi import APIRouter, Body, File, Form, UploadFile
 
 from api.models import SessionModel
 from api.request_utils import RequestUtils
@@ -17,6 +17,9 @@ from api.routers.presentation.handlers.generate_data import (
     PresentationGenerateDataHandler,
 )
 from api.routers.presentation.handlers.generate_image import GenerateImageHandler
+from api.routers.presentation.handlers.generate_presentation import (
+    GeneratePresentationHandler,
+)
 from api.routers.presentation.handlers.generate_presentation_requirements import (
     GeneratePresentationRequirementsHandler,
 )
@@ -53,6 +56,7 @@ from api.routers.presentation.models import (
     EditPresentationSlideRequest,
     ExportAsRequest,
     GenerateImageRequest,
+    GeneratePresentationRequest,
     GeneratePresentationRequirementsRequest,
     GenerateResearchReportRequest,
     PresentationAndPath,
@@ -61,6 +65,7 @@ from api.routers.presentation.models import (
     GenerateOutlinesRequest,
     PresentationAndUrls,
     PresentationGenerateRequest,
+    PresentationPathAndEditPath,
     SearchIconRequest,
     SearchImageRequest,
     UpdatePresentationThemeRequest,
@@ -319,4 +324,21 @@ async def delete_slide(slide_id: str, presentation_id: str):
     )
     return await handle_errors(
         DeleteSlideHandler(slide_id).delete, logging_service, log_metadata
+    )
+
+
+@presentation_router.post(
+    "/generate/presentation", response_model=PresentationPathAndEditPath
+)
+async def generate_presentation(data: Annotated[GeneratePresentationRequest, Form()]):
+    presentation_id = str(uuid.uuid4())
+
+    request_utils = RequestUtils(f"{route_prefix}/generate/presentation")
+    logging_service, log_metadata = await request_utils.initialize_logger(
+        presentation_id=presentation_id,
+    )
+    return await handle_errors(
+        GeneratePresentationHandler(presentation_id, data).post,
+        logging_service,
+        log_metadata,
     )

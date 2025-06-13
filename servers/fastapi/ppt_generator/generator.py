@@ -3,7 +3,12 @@ from typing import AsyncIterator, List, Optional
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import SystemMessage, HumanMessage, AIMessageChunk
+from langchain_core.messages import (
+    SystemMessage,
+    HumanMessage,
+    AIMessageChunk,
+    AIMessage,
+)
 from ppt_config_generator.models import SlideMarkdownModel
 from ppt_generator.models.llm_models import LLMPresentationModel
 
@@ -66,12 +71,9 @@ CREATE_PRESENTATION_PROMPT = """
 """
 
 
-def generate_presentation_stream(
-    title: str,
-    notes: Optional[List[str]],
-    outlines: List[SlideMarkdownModel],
-) -> AsyncIterator[AIMessageChunk]:
-
+def get_model_and_messages(
+    title: str, notes: Optional[List[str]], outlines: List[SlideMarkdownModel]
+):
     schema = LLMPresentationModel.model_json_schema()
 
     system_prompt = f"{CREATE_PRESENTATION_PROMPT} -|0|--|0|- Follow this schema while giving out response: {schema}. Make description short and obey the character limits. Output should be in JSON format. Give out only JSON, nothing else."
@@ -96,4 +98,23 @@ def generate_presentation_stream(
         else ChatGoogleGenerativeAI(model="gemini-2.0-flash")
     )
 
+    return model, system_prompt, user_message
+
+
+def generate_presentation_stream(
+    title: str,
+    notes: Optional[List[str]],
+    outlines: List[SlideMarkdownModel],
+) -> AsyncIterator[AIMessageChunk]:
+    model, system_prompt, user_message = get_model_and_messages(title, notes, outlines)
+
     return model.astream([system_prompt, user_message])
+
+
+async def generate_presentation(
+    title: str,
+    notes: Optional[List[str]],
+    outlines: List[SlideMarkdownModel],
+) -> AIMessage:
+    model, system_prompt, user_message = get_model_and_messages(title, notes, outlines)
+    return await model.ainvoke([system_prompt, user_message])

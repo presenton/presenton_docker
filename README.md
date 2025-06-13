@@ -40,7 +40,7 @@ Open http://localhost:5000 on browser of your choice to use Presenton.
 
 ## Deployment Configurations
 
-You may want to directly provide your API KEYS as environment variables and keep them hidden for deployment. You can set these environment variables to achieve it.
+You may want to directly provide your API KEYS as environment variables and keep them hidden. You can set these environment variables to achieve it.
 
 - **CAN_CHANGE_KEYS=[true/false]**: Set this to **false** if you want to keep API Keys hidden and make them unmodifiable.
 - **LLM=[openai/google]**: Select **LLM** of your choice.
@@ -49,6 +49,58 @@ You may want to directly provide your API KEYS as environment variables and keep
 
 ```bash
 docker run -it --name presenton -p 5000:80 -e LLM="openai" -e OPENAI_API_KEY="******" -e CAN_CHANGE_KEYS="false" -v "./user_data:/app/user_data" ghcr.io/presenton/presenton:latest
+```
+
+## Using Presenton API
+
+### Generate Presentation
+
+Endpoint: `/api/v1/ppt/generate/presentation`
+
+Method: `POST`
+
+Content-Type: `multipart/form-data`
+
+#### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| prompt | string | Yes | The main topic or prompt for generating the presentation |
+| n_slides | integer | No | Number of slides to generate (default: 8, min: 5, max: 15) |
+| language | string | No | Language for the presentation (default: "English") |
+| theme | string | No | Presentation theme (default: "light"). Available options: "light", "dark", "cream", "royal_blue", "faint_yellow", "light_red", "dark_pink" |
+| documents | File[] | No | Optional list of document files to include in the presentation. Supported file types: PDF, TXT, PPTX, DOCX |
+| export_as | string | No | Export format ("pptx" or "pdf", default: "pptx") |
+
+#### Response
+
+```json
+{
+    "presentation_id": "string",
+    "path": "string",
+    "edit_path": "string"
+}
+```
+
+#### Example Request
+
+```bash
+curl -X POST http://localhost:5000/api/v1/ppt/generate/presentation \
+  -F "prompt=Introduction to Machine Learning" \
+  -F "n_slides=5" \
+  -F "language=English" \
+  -F "theme=light" \
+  -F "export_as=pptx"
+```
+
+#### Example Response
+
+```json
+{
+  "presentation_id": "d3000f96-096c-4768-b67b-e99aed029b57",
+  "path": "/static/user_data/d3000f96-096c-4768-b67b-e99aed029b57/Introduction_to_Machine_Learning.pptx",
+  "edit_path": "/presentation?id=d3000f96-096c-4768-b67b-e99aed029b57"
+}
 ```
 
 ## Features

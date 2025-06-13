@@ -56,9 +56,6 @@ const startServers = async () => {
     console.error("FastAPI process failed to start:", err);
   });
 
-  // Wait for FastAPI to be available
-  await execAsync(`npx wait-on http://${localhost}:${fastapiPort}/docs`);
-
   const nextjsProcess = spawn(
     "npm",
     ["run", isDev ? "dev" : "start", "--", "-p", nextjsPort.toString()],
