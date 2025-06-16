@@ -4,7 +4,9 @@ FROM python:3.11-slim-bookworm
 RUN apt-get update && apt-get install -y \
   nodejs \  
   npm \
-  nginx
+  nginx \
+  curl \
+  redis-server
 
 # Change working directory
 WORKDIR /app
@@ -15,9 +17,13 @@ RUN ls -a
 ENV APP_DATA_DIRECTORY=/app/user_data
 ENV TEMP_DIRECTORY=/tmp/presenton
 
+# Install ollama
+RUN curl -fsSL https://ollama.com/install.sh | sh
+
 # Install dependencies for FastAPI
 COPY servers/fastapi/requirements.txt ./
 RUN pip install -r requirements.txt
+
 
 # Install dependencies for Next.js
 WORKDIR /app/servers/nextjs
@@ -31,7 +37,7 @@ RUN npx puppeteer browsers install chrome --install-deps
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Expose the port
-EXPOSE 80 3000 8000
+EXPOSE 80 3000 8000 6379
 
 # Start the servers
-CMD ["/bin/bash", "-c", "service nginx start && node /app/start.js"]
+CMD ["/bin/bash", "-c", "ollama serve & service nginx start & service redis-server start && node /app/start.js"]

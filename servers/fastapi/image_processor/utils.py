@@ -1,11 +1,11 @@
 import asyncio
 import os
-from api.services.instances import temp_file_service
+from api.services.instances import TEMP_FILE_SERVICE
 import pdfplumber
 
 
 def get_page_images_from_pdf(document_path: str, temp_dir: str):
-    images_temp_dir = temp_file_service.create_dir_in_dir(temp_dir)
+    images_temp_dir = TEMP_FILE_SERVICE.create_dir_in_dir(temp_dir)
 
     with pdfplumber.open(document_path) as pdf:
         for page in pdf.pages:

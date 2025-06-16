@@ -6,7 +6,7 @@ from api.routers.presentation.models import (
     PresentationAndPaths,
 )
 from api.services.logging import LoggingService
-from api.services.instances import temp_file_service
+from api.services.instances import TEMP_FILE_SERVICE
 from api.utils import get_presentation_dir, get_presentation_images_dir
 from image_processor.images_finder import generate_image
 
@@ -17,7 +17,7 @@ class GenerateImageHandler:
         self.data = data
 
         self.session = str(uuid.uuid4())
-        self.temp_dir = temp_file_service.create_temp_dir(self.session)
+        self.temp_dir = TEMP_FILE_SERVICE.create_temp_dir(self.session)
 
         self.presentation_dir = get_presentation_dir(self.data.presentation_id)
 

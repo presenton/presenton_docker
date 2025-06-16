@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum
 from typing import List, Literal, Optional
 from fastapi import UploadFile
@@ -11,6 +12,7 @@ from ppt_generator.models.query_and_prompt_models import (
 )
 from ppt_generator.models.slide_model import SlideModel
 from api.sql_models import PresentationSqlModel, SlideSqlModel
+from ollama._types import ModelDetails
 
 
 class ThemeEnum(Enum):
@@ -163,3 +165,11 @@ class GeneratePresentationRequest(BaseModel):
     theme: ThemeEnum = Field(default=ThemeEnum.LIGHT)
     documents: Optional[List[UploadFile]] = None
     export_as: Literal["pptx", "pdf"] = Field(default="pptx")
+
+
+class OllamaModelStatusResponse(BaseModel):
+    name: str
+    size: Optional[int] = None
+    downloaded: Optional[int] = None
+    status: str
+    done: bool

@@ -3,7 +3,7 @@ import re
 
 from api.models import LogMetadata
 from api.routers.presentation.models import GenerateOutlinesRequest
-from api.services.instances import temp_file_service
+from api.services.instances import TEMP_FILE_SERVICE
 from api.services.logging import LoggingService
 from api.sql_models import PresentationSqlModel
 from ppt_config_generator.ppt_outlines_generator import generate_ppt_content
@@ -15,10 +15,10 @@ class PresentationOutlinesGenerateHandler:
         self.data = data
 
         self.session = str(uuid.uuid4())
-        self.temp_dir = temp_file_service.create_temp_dir(self.session)
+        self.temp_dir = TEMP_FILE_SERVICE.create_temp_dir(self.session)
 
     def __del__(self):
-        temp_file_service.cleanup_temp_dir(self.temp_dir)
+        TEMP_FILE_SERVICE.cleanup_temp_dir(self.temp_dir)
 
     async def post(self, logging_service: LoggingService, log_metadata: LogMetadata):
 

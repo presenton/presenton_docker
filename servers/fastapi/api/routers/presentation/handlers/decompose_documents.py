@@ -6,7 +6,7 @@ from api.routers.presentation.models import (
     DecomposeDocumentsRequest,
     DecomposeDocumentsResponse,
 )
-from api.services.instances import temp_file_service
+from api.services.instances import TEMP_FILE_SERVICE
 from api.services.logging import LoggingService
 from document_processor.loader import DocumentsLoader
 
@@ -20,7 +20,7 @@ class DecomposeDocumentsHandler:
         )
 
         self.session = str(uuid.uuid4())
-        self.temp_dir = temp_file_service.create_temp_dir(self.session)
+        self.temp_dir = TEMP_FILE_SERVICE.create_temp_dir(self.session)
 
     async def post(self, logging_service: LoggingService, log_metadata: LogMetadata):
         logging_service.logger.info(
@@ -34,7 +34,7 @@ class DecomposeDocumentsHandler:
 
         document_paths = []
         for parsed_doc in parsed_documents:
-            file_path = temp_file_service.create_temp_file_path(
+            file_path = TEMP_FILE_SERVICE.create_temp_file_path(
                 f"{str(uuid.uuid4())}.txt", self.temp_dir
             )
             parsed_doc = parsed_doc.page_content.replace("<br>", "\n")

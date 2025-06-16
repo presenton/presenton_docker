@@ -6,7 +6,7 @@ from api.routers.presentation.models import (
 )
 from api.services.logging import LoggingService
 from image_processor.icons_finder import get_icons
-from api.services.instances import temp_file_service
+from api.services.instances import TEMP_FILE_SERVICE
 from image_processor.icons_vectorstore_utils import get_icons_vectorstore
 
 
@@ -16,7 +16,7 @@ class SearchIconHandler:
         self.data = data
 
         self.session = str(uuid.uuid4())
-        self.temp_dir = temp_file_service.create_temp_dir(self.session)
+        self.temp_dir = TEMP_FILE_SERVICE.create_temp_dir(self.session)
 
     async def post(self, logging_service: LoggingService, log_metadata: LogMetadata):
 

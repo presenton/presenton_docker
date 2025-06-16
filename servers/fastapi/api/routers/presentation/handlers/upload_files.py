@@ -6,7 +6,7 @@ from api.routers.presentation.models import DocumentsAndImagesPath
 from api.services.logging import LoggingService
 from api.validators import validate_files
 from document_processor.loader import UPLOAD_ACCEPTED_DOCUMENTS
-from api.services.instances import temp_file_service
+from api.services.instances import TEMP_FILE_SERVICE
 
 
 class UploadFilesHandler:
@@ -20,7 +20,7 @@ class UploadFilesHandler:
         self.images = images
 
         self.session = str(uuid.uuid4())
-        self.temp_dir = temp_file_service.create_temp_dir(self.session)
+        self.temp_dir = TEMP_FILE_SERVICE.create_temp_dir(self.session)
         print("Upload Temp Dir: " + self.temp_dir)
 
     async def post(self, logging_service: LoggingService, log_metadata: LogMetadata):
@@ -46,7 +46,7 @@ class UploadFilesHandler:
         if self.documents or self.images:
             all_documents = self.documents + self.images
             for doc in all_documents:
-                temp_path = temp_file_service.create_temp_file_path(
+                temp_path = TEMP_FILE_SERVICE.create_temp_file_path(
                     doc.filename, self.temp_dir
                 )
                 with open(temp_path, "wb") as f:

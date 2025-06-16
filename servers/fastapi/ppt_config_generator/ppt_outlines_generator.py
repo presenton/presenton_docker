@@ -2,6 +2,7 @@ import os
 from typing import Optional
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
 
 from ppt_config_generator.models import PresentationMarkdownModel
@@ -46,6 +47,7 @@ def get_prompt_template():
                 - Images or Icons information provided in **Input** must be included in the **notes**.
                 - Notes should cleary define if it is for specific slide or for the presentation.
                 - Slide **body** should not contain slide **title**.
+                - Slide **title** should not contain "Slide 1", "Slide 2", etc.
                 """,
             ),
             (
@@ -67,6 +69,7 @@ async def generate_ppt_content(
         if os.getenv("LLM") == "openai"
         else ChatGoogleGenerativeAI(model="gemini-2.0-flash")
     )
+    # model = ChatOllama(model="llama3.2:3b")
 
     chain = get_prompt_template() | model.with_structured_output(
         PresentationMarkdownModel.model_json_schema()

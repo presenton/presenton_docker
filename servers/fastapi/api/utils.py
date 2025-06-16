@@ -73,11 +73,11 @@ def replace_file_name(old_name: str, new_name: str) -> str:
 
 
 def save_uploaded_files(
-    temp_file_service, files: List[UploadFile], file_paths: List[str], temp_dir: str
+    TEMP_FILE_SERVICE, files: List[UploadFile], file_paths: List[str], temp_dir: str
 ) -> List:
     full_file_paths = []
     for index, each_file in enumerate(files):
-        temp_file_path = temp_file_service.create_temp_file(
+        temp_file_path = TEMP_FILE_SERVICE.create_temp_file(
             file_paths[index], each_file.file.read(), dir_path=temp_dir
         )
         full_file_paths.append(temp_file_path)
@@ -117,12 +117,12 @@ async def download_files(urls: List[str], save_paths: List[str]):
 
 
 async def handle_errors(
-    func, logging_service: LoggingService, log_metadata: LogMetadata
+    func, logging_service: LoggingService, log_metadata: LogMetadata, **kwargs
 ):
     try:
         logging_service.logger.info(f"START", extra=log_metadata.model_dump())
         response = await func(
-            logging_service=logging_service, log_metadata=log_metadata
+            logging_service=logging_service, log_metadata=log_metadata, **kwargs
         )
         is_stream = isinstance(response, StreamingResponse)
         logging_service.logger.info(

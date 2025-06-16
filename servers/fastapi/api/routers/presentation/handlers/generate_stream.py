@@ -21,7 +21,7 @@ from api.utils import get_presentation_dir
 from ppt_generator.generator import generate_presentation_stream
 from ppt_generator.models.llm_models import LLMPresentationModel
 from ppt_generator.models.slide_model import SlideModel
-from api.services.instances import temp_file_service
+from api.services.instances import TEMP_FILE_SERVICE
 from langchain_core.output_parsers import JsonOutputParser
 
 output_parser = JsonOutputParser(pydantic_object=LLMPresentationModel)
@@ -33,11 +33,11 @@ class PresentationGenerateStreamHandler(FetchAssetsOnPresentationGenerationMixin
         self.session = session
         self.presentation_id = presentation_id
 
-        self.temp_dir = temp_file_service.create_temp_dir(self.session)
+        self.temp_dir = TEMP_FILE_SERVICE.create_temp_dir(self.session)
         self.presentation_dir = get_presentation_dir(self.presentation_id)
 
     def __del__(self):
-        temp_file_service.cleanup_temp_dir(self.temp_dir)
+        TEMP_FILE_SERVICE.cleanup_temp_dir(self.temp_dir)
 
     async def get(self, *args, **kwargs):
         with get_sql_session() as sql_session:

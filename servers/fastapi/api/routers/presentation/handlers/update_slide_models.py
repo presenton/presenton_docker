@@ -13,7 +13,7 @@ from api.services.logging import LoggingService
 from api.sql_models import PresentationSqlModel, SlideSqlModel
 from api.utils import download_files, get_presentation_dir, replace_file_name
 from api.services.database import get_sql_session
-from api.services.instances import temp_file_service
+from api.services.instances import TEMP_FILE_SERVICE
 
 
 class UpdateSlideModelsHandler:
@@ -22,12 +22,12 @@ class UpdateSlideModelsHandler:
         self.data = data
         self.presentation_id = data.presentation_id
         self.session = str(uuid.uuid4())
-        self.temp_dir = temp_file_service.create_temp_dir()
+        self.temp_dir = TEMP_FILE_SERVICE.create_temp_dir()
 
         self.presentation_dir = get_presentation_dir(self.presentation_id)
 
     def __del__(self):
-        temp_file_service.cleanup_temp_dir(self.temp_dir)
+        TEMP_FILE_SERVICE.cleanup_temp_dir(self.temp_dir)
 
     async def post(self, logging_service: LoggingService, log_metadata: LogMetadata):
         logging_service.logger.info(

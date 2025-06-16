@@ -1,3 +1,3 @@
-from tests.test_generate_image import test_generate_image
+from tests.test_ollama import test_ollama
 
-test_generate_image()
+test_ollama()
