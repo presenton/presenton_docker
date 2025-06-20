@@ -1,19 +1,60 @@
 from typing import Optional
 import os
 from langchain_google_genai import ChatGoogleGenerativeAI
+from api.utils import get_small_model
+from ppt_config_generator.models import SlideMarkdownModel
 from ppt_generator.fix_validation_errors import get_validated_response
-from ppt_generator.models.content_type_models import (
-    CONTENT_TYPE_MAPPING,
-)
+from ppt_generator.models.content_type_models import CONTENT_TYPE_MAPPING
 
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 
-from ppt_generator.models.other_models import SlideType, SlideTypeModel
+from ppt_generator.models.llm_models import (
+    LLM_CONTENT_TYPE_MAPPING,
+    LLMSlideContentModel,
+)
+from ppt_generator.models.other_models import SlideTypeModel
 from ppt_generator.models.slide_model import SlideModel
 
 
-prompt_template_from_slide = ChatPromptTemplate.from_messages(
+prompt_template_to_generate_slide_content = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """
+            Generate structured slide based on provided title and outline, follow mentioned steps and notes and provide structured output.
+
+
+            # Steps
+            1. Analyze the outline and title.
+            2. Generate structured slide based on the outline and title.
+            3. Generate image prompts and icon queries if mentioned in schema.
+            4. Generate graph if mentioned in schema.
+
+            # Notes
+            - Slide body should not use words like "This slide", "This presentation".
+            - Rephrase the slide body to make it flow naturally.
+            - Do not use markdown formatting in slide body.
+            - **Icon query** must be a generic single word noun.
+            - Example of **Image prompt**: deer in forest, moon in sky, etc.
+            {notes}
+            """,
+        ),
+        (
+            "user",
+            """
+            ## Slide Title
+            {title}
+
+            ## Slide Outline
+            {outline}
+        """,
+        ),
+    ]
+)
+
+
+prompt_template_to_edit_slide_content = ChatPromptTemplate.from_messages(
     [
         (
             "system",
@@ -46,7 +87,7 @@ prompt_template_from_slide = ChatPromptTemplate.from_messages(
 )
 
 
-prompt_template_from_slide_type = ChatPromptTemplate.from_messages(
+prompt_template_to_select_slide_type = ChatPromptTemplate.from_messages(
     [
         (
             "system",
@@ -63,8 +104,6 @@ prompt_template_from_slide_type = ChatPromptTemplate.from_messages(
                 - **7**: contains title and list of items with icons.
                 - **8**: contains title, description and list of items with icons.
                 - **9**: contains title, list of items and a graph.
-                - **10**: contains title, list of inforgraphic charts with supporting information.
-                - **11**: contains title, a single inforgraphic chart and description.
 
             # Notes
             - Do not select different slide type than current unless absolutely necessary as per user prompt.
@@ -84,9 +123,29 @@ prompt_template_from_slide_type = ChatPromptTemplate.from_messages(
 )
 
 
+async def get_slide_content_from_type_and_outline(
+    slide_type: int, outline: SlideMarkdownModel
+) -> LLMSlideContentModel:
+    content_type_model_type = LLM_CONTENT_TYPE_MAPPING[slide_type]
+    model = get_small_model().with_structured_output(
+        content_type_model_type.model_json_schema()
+    )
+    chain = prompt_template_to_generate_slide_content | model
+
+    return await get_validated_response(
+        chain,
+        {
+            "title": outline.title,
+            "outline": outline.body,
+            "notes": content_type_model_type.get_notes(),
+        },
+        content_type_model_type,
+    )
+
+
 async def get_edited_slide_content_model(
     prompt: str,
-    slide_type: SlideType,
+    slide_type: int,
     slide: SlideModel,
     theme: Optional[dict] = None,
     language: Optional[str] = None,
@@ -98,7 +157,7 @@ async def get_edited_slide_content_model(
     )
 
     content_type_model_type = CONTENT_TYPE_MAPPING[slide_type]
-    chain = prompt_template_from_slide | model.with_structured_output(
+    chain = prompt_template_to_edit_slide_content | model.with_structured_output(
         content_type_model_type.model_json_schema()
     )
     slide_data = slide.content.model_dump_json()
@@ -126,7 +185,7 @@ async def get_slide_type_from_prompt(
         else ChatGoogleGenerativeAI(model="gemini-2.0-flash")
     )
 
-    chain = prompt_template_from_slide_type | model.with_structured_output(
+    chain = prompt_template_to_select_slide_type | model.with_structured_output(
         SlideTypeModel.model_json_schema()
     )
     slide_data = slide.content.model_dump_json()

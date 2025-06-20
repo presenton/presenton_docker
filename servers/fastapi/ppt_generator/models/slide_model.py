@@ -2,7 +2,6 @@ import uuid
 from typing import List, Optional
 from pydantic import BaseModel
 
-from ppt_generator.models.other_models import SlideType
 from ppt_generator.models.content_type_models import (
     CONTENT_TYPE_MAPPING,
     Type1Content,
@@ -20,7 +19,7 @@ from ppt_generator.models.content_type_models import (
 class SlideModel(BaseModel):
     id: Optional[str] = None
     index: int
-    type: SlideType
+    type: int
     design_index: Optional[int] = None
     images: Optional[List[str]] = None
     icons: Optional[List[str]] = None

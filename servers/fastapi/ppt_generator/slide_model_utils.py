@@ -1,31 +1,40 @@
 from typing import List, Optional
-from ppt_generator.models.other_models import SlideType
+from ppt_generator.models.other_models import (
+    TYPE1,
+    TYPE2,
+    TYPE3,
+    TYPE4,
+    TYPE5,
+    TYPE6,
+    TYPE7,
+    TYPE8,
+    TYPE9,
+)
 from ppt_generator.models.query_and_prompt_models import (
     IconCategoryEnum,
-    IconFrameEnum,
     IconQueryCollectionWithData,
     ImageAspectRatio,
     ImagePromptWithThemeAndAspectRatio,
 )
 from ppt_generator.models.slide_model import SlideModel
 
-SLIDE_WITHOUT_IMAGE = [
-    SlideType.type2,
-    SlideType.type5,
-    SlideType.type6,
-    SlideType.type7,
-    SlideType.type8,
-    SlideType.type9,
+SLIDES_WITHOUT_IMAGES = [
+    TYPE2,
+    TYPE5,
+    TYPE6,
+    TYPE7,
+    TYPE8,
+    TYPE9,
 ]
 
-SLIDE_WITHOUT_ICON = [
-    SlideType.type1,
-    SlideType.type2,
-    SlideType.type3,
-    SlideType.type4,
-    SlideType.type5,
-    SlideType.type6,
-    SlideType.type9,
+SLIDES_WITHOUT_ICONS = [
+    TYPE1,
+    TYPE2,
+    TYPE3,
+    TYPE4,
+    TYPE5,
+    TYPE6,
+    TYPE9,
 ]
 
 
@@ -49,15 +58,15 @@ class SlideModelUtils:
 
     def get_image_prompts(self) -> List[ImagePromptWithThemeAndAspectRatio]:
         theme_prompt = THEME_PROMPTS.get(self.theme["name"], "") if self.theme else ""
-        if self.type in SLIDE_WITHOUT_IMAGE:
+        if self.type in SLIDES_WITHOUT_IMAGES:
             return []
 
         aspect_ratio = ImageAspectRatio.r_1_1
 
-        if self.type is SlideType.type3:
+        if self.type is TYPE3:
             aspect_ratio = ImageAspectRatio.r_2_3
 
-        elif self.type is SlideType.type4:
+        elif self.type is TYPE4:
             count = len(self.content.body)
             aspect_ratio = (
                 ImageAspectRatio.r_5_4 if count == 3 else ImageAspectRatio.r_21_9
@@ -73,7 +82,7 @@ class SlideModelUtils:
         ]
 
     def get_icon_queries(self) -> List[IconQueryCollectionWithData]:
-        if self.type in SLIDE_WITHOUT_ICON:
+        if self.type in SLIDES_WITHOUT_ICONS:
             return []
 
         category = IconCategoryEnum.solid

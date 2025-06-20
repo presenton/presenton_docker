@@ -16,6 +16,9 @@ class PresentationSqlModel(SQLModel, table=True):
     theme: Optional[dict] = Field(sa_column=Column(JSON, nullable=True), default=None)
     file: Optional[str] = None
     title: Optional[str] = None
+    structure: Optional[dict] = Field(
+        sa_column=Column(JSON, nullable=True), default=None
+    )
     notes: Optional[List[str]] = Field(
         sa_column=Column(JSON, nullable=True), default=None
     )

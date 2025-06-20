@@ -19,6 +19,7 @@ from api.sql_models import PresentationSqlModel, SlideSqlModel
 from api.utils import get_presentation_dir
 from document_processor.loader import DocumentsLoader
 from ppt_config_generator.document_summary_generator import generate_document_summary
+from ppt_config_generator.models import PresentationMarkdownModel
 from ppt_config_generator.ppt_outlines_generator import generate_ppt_content
 from ppt_generator.generator import generate_presentation
 from ppt_generator.models.llm_models import LLMPresentationModel
@@ -71,9 +72,11 @@ class GeneratePresentationHandler(FetchAssetsOnPresentationGenerationMixin):
         print("Generating Presentation")
         presentation_text = (
             await generate_presentation(
-                presentation_content.title,
-                presentation_content.notes,
-                presentation_content.slides,
+                PresentationMarkdownModel(
+                    title=presentation_content.title,
+                    slides=presentation_content.slides,
+                    notes=presentation_content.notes,
+                )
             )
         ).content
 

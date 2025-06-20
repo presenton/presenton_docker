@@ -1,11 +1,15 @@
+import os
 import uuid
 
 from fastapi import HTTPException
 from api.models import LogMetadata, SessionModel
 from api.routers.presentation.models import PresentationGenerateRequest
 from api.services.logging import LoggingService
-from api.sql_models import KeyValueSqlModel
+from api.sql_models import KeyValueSqlModel, PresentationSqlModel
 from api.services.database import get_sql_session
+from api.utils import is_ollama_selected
+from ppt_config_generator.models import PresentationMarkdownModel
+from ppt_config_generator.structure_generator import generate_presentation_structure
 
 
 class PresentationGenerateDataHandler:
@@ -28,6 +32,24 @@ class PresentationGenerateDataHandler:
             key=self.session,
             value=self.data.model_dump(mode="json"),
         )
+
+        if is_ollama_selected():
+            with get_sql_session() as sql_session:
+                presentation = sql_session.get(
+                    PresentationSqlModel, self.data.presentation_id
+                )
+                presentation_structure = await generate_presentation_structure(
+                    PresentationMarkdownModel(
+                        **{
+                            "title": presentation.title,
+                            "slides": presentation.outlines,
+                            "notes": presentation.notes,
+                        }
+                    )
+                )
+                presentation.structure = presentation_structure.model_dump(mode="json")
+                sql_session.commit()
+                sql_session.refresh(presentation)
 
         with get_sql_session() as sql_session:
             sql_session.add(key_value_model)

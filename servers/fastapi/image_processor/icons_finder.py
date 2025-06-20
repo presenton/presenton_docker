@@ -13,7 +13,7 @@ async def get_icon(
     input: IconQueryCollectionWithData,
 ) -> str:
     try:
-        query = input.icon_query.queries[0]
+        query = input.icon_query
         results = vector_store.similarity_search(query=query, k=1)
         icon_name = results[0].page_content
         return get_resource(f"assets/icons/bold/{icon_name}.png")

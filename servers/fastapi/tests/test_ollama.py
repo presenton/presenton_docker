@@ -1,61 +1,62 @@
 import asyncio
 import json
-from ppt_config_generator.models import PresentationMarkdownModel
+from api.utils import download_file
+from image_processor.images_finder import get_image_from_pexels
+from ppt_config_generator.structure_generator import generate_presentation_structure
+from ppt_config_generator.models import (
+    PresentationStructureModel,
+    PresentationMarkdownModel,
+    SlideMarkdownModel,
+)
 from ppt_config_generator.ppt_outlines_generator import generate_ppt_content
 from ppt_generator.generator import generate_presentation_ollama
 from ppt_generator.models.llm_models import LLMPresentationModel
+from ppt_generator.slide_generator import get_slide_content_from_type_and_outline
 
 
 def test_ollama():
+    # # Generate presentation outline
     # presentation_outline = asyncio.run(
     #     generate_ppt_content(
     #         prompt="create presentation about moon",
     #         n_slides=5,
     #     )
     # )
-    # print(presentation_outline.model_dump(mode="json"))
 
-    presentation_outline = PresentationMarkdownModel(
-        **{
-            "title": "Lunar Exploration Presentation",
-            "notes": [
-                "Number of slides as specified.",
-                "* Content must be generated for every slide.",
-                "* Images or Icons information will be included in the notes.",
-                "* Notes should clearly define if it is for specific slide or for the presentation.",
-                "* Slide body should not contain slide title.",
-            ],
-            "slides": [
-                {
-                    "title": "Introduction to the Moon",
-                    "body": "> The Moon is Earth's only natural satellite. It is a rocky, airless body that has been a subject of human fascination for centuries.",
-                },
-                {
-                    "title": "Geological History of the Moon",
-                    "body": "* Formed approximately 4.51 billion years ago from debris left over after a Mars-sized object collided with Earth.*\n* Has undergone extensive cratering and volcanic activity over its lifetime.*",
-                },
-                {
-                    "title": "Phases of the Moon",
-                    "body": "* New Moon: The side of the Moon facing away from Earth.\n* Waxing Crescent: A growing sliver of light on the right side as the Moon moves towards full moon.\n* First Quarter: Half-illuminated with the right half visible in the sky.*\n* Waning Gibbous: A decreasing sliver of light on the left side as the Moon moves away from full moon.*",
-                },
-                {
-                    "title": "Moon's Atmosphere and Surface",
-                    "body": "* The Moon has a very thin atmosphere, known as an exosphere.\n* The surface is composed primarily of silicate rocks, metals, and other minerals.",
-                },
-                {
-                    "title": "Exploration of the Moon",
-                    "body": "* **Apollo Program** (1969-1972): A series of manned missions that successfully landed astronauts on the Moon's surface.*\n* Ongoing efforts to return humans to the Moon by 2025 with NASA's Artemis program.",
-                },
-            ],
-        }
-    )
+    # # Save presentation outline to file
+    # with open("tests/tmp/presentation_outline.json", "w") as f:
+    #     json.dump(presentation_outline.model_dump(mode="json"), f)
 
-    # presentation_message = asyncio.run(
-    #     generate_presentation_ollama(
-    #         title=presentation_outline.title,
-    #         notes=presentation_outline.notes,
-    #         outlines=presentation_outline.slides,
-    #     )
+    # # Load presentation outline from file
+    # with open("tests/tmp/presentation_outline.json", "r") as f:
+    #     presentation_outline = PresentationMarkdownModel.model_validate_json(f.read())
+
+    # # Generate presentation config
+    # presentation_config = asyncio.run(generate_presentation_config(presentation_outline))
+
+    # # Save presentation config to file
+    # with open("tests/tmp/presentation_config.json", "w") as f:
+    #     json.dump(presentation_config.model_dump(mode="json"), f)
+
+    # # Load presentation config from file
+    # with open("tests/tmp/presentation_config.json", "r") as f:
+    #     presentation_config = PresentationStructureModel.model_validate_json(f.read())
+
+    # # Generate presentation
+    # presentation_output = asyncio.run(
+    #     generate_presentation_ollama(presentation_outline)
     # )
 
-    # print(json.dumps(presentation_message))
+    # # Save presentation output to file
+    # with open("tests/tmp/presentation_output.json", "w") as f:
+    #     json.dump(presentation_output.model_dump(mode="json"), f)
+
+    # # Generate slide content
+    # slide_content = asyncio.run(
+    #     get_slide_content_from_type_and_outline(9, presentation_outline.slides[3])
+    # )
+
+    # # Save slide content to file
+    # with open("tests/tmp/slide_content.json", "w") as f:
+    #     json.dump(slide_content.model_dump(mode="json"), f)
+    pass

@@ -3,8 +3,6 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from ppt_generator.models.content_type_models import IconQueryCollectionModel
-
 
 class ImageAspectRatio(Enum):
     r_1_1 = "1:1"
@@ -39,4 +37,4 @@ class IconQueryCollectionWithData(BaseModel):
     category: IconCategoryEnum = IconCategoryEnum.solid
     index: int
     theme: Optional[dict] = None
-    icon_query: IconQueryCollectionModel
+    icon_query: str

@@ -1,16 +1,15 @@
 import os
-from typing import AsyncIterator, List, Optional
+from typing import AsyncIterator
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import (
-    SystemMessage,
     HumanMessage,
     AIMessageChunk,
     AIMessage,
 )
-from ppt_config_generator.models import SlideMarkdownModel
+from ppt_config_generator.models import PresentationMarkdownModel
 from ppt_generator.models.llm_models import LLMPresentationModel
 
 CREATE_PRESENTATION_PROMPT = """
@@ -71,30 +70,27 @@ CREATE_PRESENTATION_PROMPT = """
     **Go through notes and steps and make sure they are all followed. Rule breaks are strictly not allowed.**
 """
 
+schema = LLMPresentationModel.model_json_schema()
+
+system_prompt = f"""
+{CREATE_PRESENTATION_PROMPT}
+
+Follow this schema while giving out response: {schema}.
+
+Make description short and obey the character limits. Output should be in JSON format. Give out only JSON, nothing else.
+"""
+
+ollama_system_prompt = f"""
+{CREATE_PRESENTATION_PROMPT}
+
+Make description short and obey the character limits. Output should be in JSON format. Give out only JSON, nothing else.
+"""
+
 
 def get_model_and_messages(
-    title: str, notes: Optional[List[str]], outlines: List[SlideMarkdownModel]
+    presentation_outline: PresentationMarkdownModel,
 ):
-    schema = LLMPresentationModel.model_json_schema()
-
-    system_prompt = f"""
-    {CREATE_PRESENTATION_PROMPT}
-    Follow this schema while giving out response: {schema}.
-    Make description short and obey the character limits. Output should be in JSON format. Give out only JSON, nothing else.
-    """
-
-    user_message = f"# Presentation Title: {title} \n\n"
-    for i, slide in enumerate(outlines):
-        user_message += f"## Slide {i+1}:\n"
-        user_message += f"  - Title: {slide.title} \n"
-        user_message += f"  - Body: {slide.body} \n\n"
-
-    if notes:
-        user_message += f"# Notes: \n"
-        for note in notes:
-            user_message += f"  - {note} \n"
-
-    user_message = HumanMessage(user_message)
+    user_message = HumanMessage(presentation_outline.to_string())
 
     model = (
         ChatOpenAI(model="gpt-4.1")
@@ -106,29 +102,23 @@ def get_model_and_messages(
 
 
 def generate_presentation_stream(
-    title: str,
-    notes: Optional[List[str]],
-    outlines: List[SlideMarkdownModel],
+    presentation_outline: PresentationMarkdownModel,
 ) -> AsyncIterator[AIMessageChunk]:
-    model, system_prompt, user_message = get_model_and_messages(title, notes, outlines)
+    model, system_prompt, user_message = get_model_and_messages(presentation_outline)
 
     return model.astream([system_prompt, user_message])
 
 
 async def generate_presentation(
-    title: str,
-    notes: Optional[List[str]],
-    outlines: List[SlideMarkdownModel],
+    presentation_outline: PresentationMarkdownModel,
 ) -> AIMessage:
-    model, system_prompt, user_message = get_model_and_messages(title, notes, outlines)
+    model, system_prompt, user_message = get_model_and_messages(presentation_outline)
     return await model.ainvoke([system_prompt, user_message])
 
 
 async def generate_presentation_ollama(
-    title: str,
-    notes: Optional[List[str]],
-    outlines: List[SlideMarkdownModel],
-) -> dict:
-    # model, system_prompt, user_message = get_model_and_messages(title, notes, outlines)
-    # return await model.ainvoke([system_prompt, user_message])
-    pass
+    presentation_outline: PresentationMarkdownModel,
+) -> LLMPresentationModel:
+    user_message = HumanMessage(presentation_outline.to_string())
+    model = ChatOllama(model="llama3.1:8b").with_structured_output(LLMPresentationModel)
+    return await model.ainvoke([ollama_system_prompt, user_message])

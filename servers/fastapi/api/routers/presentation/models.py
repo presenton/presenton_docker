@@ -56,7 +56,6 @@ class PresentationGenerateRequest(BaseModel):
     presentation_id: str
     theme: Optional[dict] = None
     images: Optional[List[str]] = None
-    watermark: bool = True
     outlines: List[SlideMarkdownModel]
     title: Optional[str] = None
 

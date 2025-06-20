@@ -17,12 +17,23 @@ from api.routers.presentation.models import (
 from api.services.database import get_sql_session
 from api.services.logging import LoggingService
 from api.sql_models import KeyValueSqlModel, PresentationSqlModel, SlideSqlModel
-from api.utils import get_presentation_dir
+from api.utils import get_presentation_dir, is_ollama_selected
+from ppt_config_generator.models import (
+    PresentationMarkdownModel,
+    PresentationStructureModel,
+)
 from ppt_generator.generator import generate_presentation_stream
-from ppt_generator.models.llm_models import LLMPresentationModel
+from ppt_generator.models.content_type_models import CONTENT_TYPE_MAPPING
+from ppt_generator.models.llm_models import (
+    LLM_CONTENT_TYPE_MAPPING,
+    LLMPresentationModel,
+    LLMSlideModel,
+)
 from ppt_generator.models.slide_model import SlideModel
 from api.services.instances import TEMP_FILE_SERVICE
 from langchain_core.output_parsers import JsonOutputParser
+
+from ppt_generator.slide_generator import get_slide_content_from_type_and_outline
 
 output_parser = JsonOutputParser(pydantic_object=LLMPresentationModel)
 
@@ -53,7 +64,6 @@ class PresentationGenerateStreamHandler(FetchAssetsOnPresentationGenerationMixin
         self.images = self.data.images
         self.title = self.data.title
         self.outlines = self.data.outlines
-        self.watermark = self.data.watermark
 
         return StreamingResponse(
             self.get_stream(*args, **kwargs), media_type="text/event-stream"
@@ -83,28 +93,32 @@ class PresentationGenerateStreamHandler(FetchAssetsOnPresentationGenerationMixin
             sql_session.commit()
             sql_session.refresh(presentation)
 
+        self.presentation = presentation
+
         yield SSEResponse(
             event="response", data=json.dumps({"status": "Analyzing information 📊"})
         ).to_string()
 
-        presentation_text = ""
+        self.presentation_json = None
 
-        async for chunk in generate_presentation_stream(
-            self.title, presentation.notes, self.outlines
-        ):
-            presentation_text += chunk.content
-            yield SSEResponse(
-                event="response",
-                data=json.dumps({"type": "chunk", "chunk": chunk.content}),
-            ).to_string()
-
-        presentation_json = output_parser.parse(presentation_text)
+        # self.presentation_json will be mutated by the generator
+        if is_ollama_selected():
+            async for result in self.generate_presentation_ollama():
+                yield result
+        else:
+            async for result in self.generate_presentation_openai_google():
+                yield result
 
         slide_models: List[SlideModel] = []
-        for i, content in enumerate(presentation_json["slides"]):
-            content["index"] = i
-            content["presentation"] = presentation.id
-            slide_model = SlideModel(**content)
+        for i, slide in enumerate(self.presentation_json["slides"]):
+            slide["index"] = i
+            slide["presentation"] = self.presentation.id
+            slide["content"] = (
+                LLM_CONTENT_TYPE_MAPPING[slide["type"]](**slide["content"])
+                .to_content()
+                .model_dump(mode="json")
+            )
+            slide_model = SlideModel(**slide)
             slide_models.append(slide_model)
 
         async for result in self.fetch_slide_assets(slide_models):
@@ -123,7 +137,59 @@ class PresentationGenerateStreamHandler(FetchAssetsOnPresentationGenerationMixin
         yield SSEStatusResponse(status="Packing slide data").to_string()
 
         response = PresentationAndSlides(
-            presentation=presentation, slides=slide_sql_models
+            presentation=self.presentation, slides=slide_sql_models
         ).to_response_dict()
 
         yield SSECompleteResponse(key="presentation", value=response).to_string()
+
+    async def generate_presentation_openai_google(self):
+        presentation_text = ""
+        async for chunk in generate_presentation_stream(
+            PresentationMarkdownModel(
+                title=self.title,
+                slides=self.outlines,
+                notes=self.presentation.notes,
+            )
+        ):
+            presentation_text += chunk.content
+            yield SSEResponse(
+                event="response",
+                data=json.dumps({"type": "chunk", "chunk": chunk.content}),
+            ).to_string()
+
+        self.presentation_json = output_parser.parse(presentation_text)
+
+    async def generate_presentation_ollama(self):
+        presentation_structure = PresentationStructureModel(
+            **self.presentation.structure
+        )
+        slide_models = []
+        yield SSEResponse(
+            event="response",
+            data=json.dumps({"type": "chunk", "chunk": '{ "slides": [ '}),
+        ).to_string()
+        n_slides = len(presentation_structure.slides)
+        for i, slide_structure in enumerate(presentation_structure.slides):
+            slide_content = await get_slide_content_from_type_and_outline(
+                slide_structure.type, self.outlines[i]
+            )
+            slide_model = LLMSlideModel(
+                type=slide_structure.type,
+                content=slide_content.model_dump(mode="json"),
+            )
+            slide_models.append(slide_model)
+            chunk = json.dumps(slide_model.model_dump(mode="json"))
+            if i < n_slides - 1:
+                chunk += ","
+            yield SSEResponse(
+                event="response",
+                data=json.dumps({"type": "chunk", "chunk": chunk}),
+            ).to_string()
+        yield SSEResponse(
+            event="response",
+            data=json.dumps({"type": "chunk", "chunk": " ] }"}),
+        ).to_string()
+
+        self.presentation_json = LLMPresentationModel(
+            slides=slide_models,
+        ).model_dump(mode="json")

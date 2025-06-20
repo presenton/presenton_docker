@@ -5,6 +5,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
 
+from api.utils import get_large_model
 from ppt_config_generator.models import PresentationMarkdownModel
 from ppt_generator.fix_validation_errors import get_validated_response
 
@@ -38,7 +39,6 @@ def get_prompt_template():
                 4. Develop comprehensive content using markdown structure:
                     * Use bullet points (- or *) for lists.
                     * Use **bold** for emphasis, *italic* for secondary emphasis, and `code` for technical terms.
-                    * Use > for important quotes or highlights.
                 5. Provide styling and formatting information for the presentation as notes.
                 
                 # Notes
@@ -48,6 +48,7 @@ def get_prompt_template():
                 - Notes should cleary define if it is for specific slide or for the presentation.
                 - Slide **body** should not contain slide **title**.
                 - Slide **title** should not contain "Slide 1", "Slide 2", etc.
+                - Slide **title** should not be in markdown format.
                 """,
             ),
             (
@@ -64,12 +65,7 @@ async def generate_ppt_content(
     language: Optional[str] = None,
     content: Optional[str] = None,
 ) -> PresentationMarkdownModel:
-    model = (
-        ChatOpenAI(model="gpt-4.1")
-        if os.getenv("LLM") == "openai"
-        else ChatGoogleGenerativeAI(model="gemini-2.0-flash")
-    )
-    # model = ChatOllama(model="llama3.2:3b")
+    model = get_large_model()
 
     chain = get_prompt_template() | model.with_structured_output(
         PresentationMarkdownModel.model_json_schema()

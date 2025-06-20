@@ -8,6 +8,8 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import BaseMessage
 from langchain_text_splitters import CharacterTextSplitter
 
+from api.utils import get_nano_model
+
 sysmte_prompt = """
 Generate a blog-style summary of the provided document in **more than 2000 words**.
 Maintain as much information as possible.
@@ -33,11 +35,7 @@ prompt_template = ChatPromptTemplate.from_messages(
 
 
 async def generate_document_summary(documents: List[Document]):
-    model = (
-        ChatOpenAI(model="gpt-4.1-nano", max_completion_tokens=8000)
-        if os.getenv("LLM") == "openai"
-        else ChatGoogleGenerativeAI(model="gemini-2.0-flash", max_output_tokens=8000)
-    )
+    model = get_nano_model()
     text_splitter = CharacterTextSplitter(chunk_size=200000, chunk_overlap=0)
     chain = prompt_template | model
 

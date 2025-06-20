@@ -9,9 +9,46 @@ from typing import List, Optional
 import aiohttp
 from fastapi import HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
 
 from api.models import LogMetadata, UserConfig
 from api.services.logging import LoggingService
+
+
+def is_ollama_selected() -> bool:
+    return os.getenv("LLM") != "openai" and os.getenv("LLM") != "google"
+
+
+def get_large_model():
+    selected_llm = os.getenv("LLM")
+    if selected_llm == "openai":
+        return ChatOpenAI(model="gpt-4.1")
+    elif selected_llm == "google":
+        return ChatGoogleGenerativeAI(model="gemini-2.0-flash")
+    else:
+        return ChatOllama(model=selected_llm)
+
+
+def get_small_model():
+    selected_llm = os.getenv("LLM")
+    if selected_llm == "openai":
+        return ChatOpenAI(model="gpt-4.1-mini")
+    elif selected_llm == "google":
+        return ChatGoogleGenerativeAI(model="gemini-2.0-flash")
+    else:
+        return ChatOllama(model=selected_llm)
+
+
+def get_nano_model():
+    selected_llm = os.getenv("LLM")
+    if selected_llm == "openai":
+        return ChatOpenAI(model="gpt-4.1-nano")
+    elif selected_llm == "google":
+        return ChatGoogleGenerativeAI(model="gemini-2.0-flash")
+    else:
+        return ChatOllama(model=selected_llm)
 
 
 def get_presentation_dir(presentation_id: str) -> str:
@@ -85,6 +122,7 @@ def save_uploaded_files(
 
 
 async def download_file(url: str, save_path: str, headers: Optional[dict] = None):
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(url, headers=headers) as response:
@@ -101,6 +139,7 @@ async def download_file(url: str, save_path: str, headers: Optional[dict] = None
                     print(f"Failed to download file. HTTP status: {response.status}")
                     return False
     except Exception as e:
+        print(e)
         print(f"Error while downloading file from {url} to {save_path}")
         return False
 

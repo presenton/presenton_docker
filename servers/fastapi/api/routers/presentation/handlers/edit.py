@@ -1,5 +1,4 @@
 import asyncio
-from typing import Literal
 import uuid
 
 from sqlalchemy import update
@@ -14,7 +13,6 @@ from api.utils import get_presentation_dir, get_presentation_images_dir
 from image_processor.icons_vectorstore_utils import get_icons_vectorstore
 from image_processor.images_finder import generate_image
 from image_processor.icons_finder import get_icon
-from ppt_generator.models.other_models import SlideType
 from ppt_generator.models.query_and_prompt_models import (
     IconQueryCollectionWithData,
     ImagePromptWithThemeAndAspectRatio,
@@ -61,9 +59,8 @@ class PresentationEditHandler:
             ).first()
 
         slide_to_edit = SlideModel.from_dict(slide_to_edit_sql.model_dump(mode="json"))
-        new_slide_type = SlideType(
-            (await get_slide_type_from_prompt(self.prompt, slide_to_edit)).slide_type
-        )
+        new_slide_type = await get_slide_type_from_prompt(self.prompt, slide_to_edit)
+        new_slide_type = new_slide_type.slide_type
 
         edited_content = await get_edited_slide_content_model(
             self.prompt,
@@ -173,7 +170,7 @@ class PresentationEditHandler:
                 update(SlideSqlModel)
                 .where(SlideSqlModel.id == slide_to_edit.id)
                 .values(
-                    type=new_slide_type.value,
+                    type=new_slide_type,
                     images=list(new_slide_images.values()),
                     icons=list(new_slide_icons.values()),
                     content=new_slide_model.content.model_dump(mode="json"),

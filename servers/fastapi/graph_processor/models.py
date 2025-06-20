@@ -101,44 +101,32 @@ class PieChartDataModel(BaseModel):
         return [clip_text(category) for category in self.categories]
 
 
-class TableDataModel(BaseModel):
-    categories: List[str]
-    series: List[BarSeriesModel]
+# class TableDataModel(BaseModel):
+#     categories: List[str]
+#     series: List[BarSeriesModel]
 
-    def get_categories(self) -> List[str]:
-        return [clip_text(category) for category in self.categories]
+#     def get_categories(self) -> List[str]:
+#         return [clip_text(category) for category in self.categories]
 
 
 class GraphTypeEnum(Enum):
     pie = "pie"
     bar = "bar"
-    scatter = "scatter"
-    bubble = "bubble"
     line = "line"
-    table = "table"
 
 
 class GraphModel(BaseModel):
-    id: Optional[str] = None
     style: Optional[dict] = {}
     name: str
     type: GraphTypeEnum
-    presentation: Optional[str] = None
     unit: Optional[str] = Field(
         description="Unit of the data in the graph. Example: %, kg, million USD, tonnes, etc."
     )
-    data: (
-        PieChartDataModel
-        | LineChartDataModel
-        | BubbleChartDataModel
-        | BarGraphDataModel
-        | TableDataModel
-    )
+    data: PieChartDataModel | LineChartDataModel | BarGraphDataModel
 
 
 GRAPH_TYPE_MAPPING = {
     GraphTypeEnum.pie: PieChartDataModel,
     GraphTypeEnum.bar: BarGraphDataModel,
     GraphTypeEnum.line: LineChartDataModel,
-    GraphTypeEnum.bubble: BubbleChartDataModel,
 }

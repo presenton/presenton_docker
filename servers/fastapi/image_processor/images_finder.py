@@ -9,21 +9,31 @@ from openai import OpenAI
 from ppt_generator.models.query_and_prompt_models import (
     ImagePromptWithThemeAndAspectRatio,
 )
-from api.utils import get_resource
+from api.utils import download_file, get_resource, is_ollama_selected
 
 
 async def generate_image(
     input: ImagePromptWithThemeAndAspectRatio,
     output_directory: str,
 ) -> str:
-    image_prompt = f"{input.image_prompt}, {input.theme_prompt}"
+    is_ollama = is_ollama_selected()
+
+    image_prompt = (
+        input.image_prompt
+        if is_ollama
+        else f"{input.image_prompt}, {input.theme_prompt}"
+    )
     print(f"Request - Generating Image for {image_prompt}")
 
     try:
         image_gen_func = (
-            generate_image_openai
-            if os.getenv("LLM") == "openai"
-            else generate_image_google
+            get_image_from_pexels
+            if is_ollama
+            else (
+                generate_image_openai
+                if os.getenv("LLM") == "openai"
+                else generate_image_google
+            )
         )
         image_path = await image_gen_func(image_prompt, output_directory)
         if image_path and os.path.exists(image_path):
@@ -72,3 +82,16 @@ async def generate_image_google(prompt: str, output_directory: str) -> str:
         f.write(base64.b64decode(base64_image))
 
     return image_path
+
+
+async def get_image_from_pexels(prompt: str, output_directory: str) -> str:
+    async with aiohttp.ClientSession() as session:
+        response = await session.get(
+            f"https://api.pexels.com/v1/search?query={prompt}&per_page=1",
+            headers={"Authorization": f'{os.getenv("PEXELS_API_KEY")}'},
+        )
+        data = await response.json()
+        image_url = data["photos"][0]["src"]["large"]
+        image_path = os.path.join(output_directory, f"{str(uuid.uuid4())}.jpg")
+        await download_file(image_url, image_path)
+        return image_path

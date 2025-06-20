@@ -88,6 +88,32 @@ const PROVIDER_CONFIGS: Record<string, ProviderConfig> = {
             docsUrl: "https://aistudio.google.com/app/apikey",
         },
     },
+    "llama3.1:8b": {
+        textModels: [
+            {
+                value: "llama3.1:8b",
+                label: "Llama3.1:8b",
+                description: "Balanced model for most tasks",
+            },
+        ],
+        imageModels: [
+            {
+                value: "pexels",
+                label: "Pexels",
+                description: "Pexels is a free stock photo and video platform that allows you to download high-quality images and videos for free.",
+            },
+        ],
+        apiGuide: {
+            title: "How to get your Pexels API Key",
+            steps: [
+                "Visit pexels.com",
+                'Click on "Get API key" in the top navigation',
+                "Copy your API key - you're ready to go!",
+            ],
+            videoUrl: "https://www.youtube.com/watch?v=o8iyrtQyrZM&t=66s",
+            docsUrl: "https://www.pexels.com/api/documentation/",
+        },
+    },
 };
 
 export default function Home() {
