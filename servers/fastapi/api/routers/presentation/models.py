@@ -172,3 +172,7 @@ class OllamaModelStatusResponse(BaseModel):
     downloaded: Optional[int] = None
     status: str
     done: bool
+
+
+class OllamaSupportedModelsResponse(BaseModel):
+    models: List[str]

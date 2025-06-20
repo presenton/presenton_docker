@@ -1,5 +1,6 @@
 import ollama
 from api.models import LogMetadata
+from api.routers.presentation.models import OllamaModelStatusResponse
 from api.services.logging import LoggingService
 
 
@@ -18,4 +19,13 @@ class ListPulledOllamaModelsHandler:
             extra=log_metadata.model_dump(),
         )
 
-        return response.models
+        return [
+            OllamaModelStatusResponse(
+                name=model.model,
+                size=model.size,
+                status="pulled",
+                downloaded=model.size,
+                done=True,
+            )
+            for model in response.models
+        ]

@@ -37,6 +37,9 @@ from api.routers.presentation.handlers.get_presentations import GetPresentations
 from api.routers.presentation.handlers.list_ollama_pulled_models import (
     ListPulledOllamaModelsHandler,
 )
+from api.routers.presentation.handlers.list_supported_ollama_models import (
+    ListSupportedOllamaModelsHandler,
+)
 from api.routers.presentation.handlers.pull_ollama_model import PullOllamaModelHandler
 from api.routers.presentation.handlers.search_icon import SearchIconHandler
 from api.routers.presentation.handlers.search_image import SearchImageHandler
@@ -63,6 +66,8 @@ from api.routers.presentation.models import (
     GeneratePresentationRequest,
     GeneratePresentationRequirementsRequest,
     GenerateResearchReportRequest,
+    OllamaModelStatusResponse,
+    OllamaSupportedModelsResponse,
     PresentationAndPath,
     PresentationAndPaths,
     PresentationAndSlides,
@@ -349,7 +354,20 @@ async def generate_presentation(data: Annotated[GeneratePresentationRequest, For
 
 
 # Ollama Support
-@presentation_router.get("/ollama/list-pulled-models")
+@presentation_router.get(
+    "/ollama/list-supported-models", response_model=OllamaSupportedModelsResponse
+)
+async def list_supported_ollama_models():
+    request_utils = RequestUtils(f"{route_prefix}/ollama/list-supported-models")
+    logging_service, log_metadata = await request_utils.initialize_logger()
+    return await handle_errors(
+        ListSupportedOllamaModelsHandler().get, logging_service, log_metadata
+    )
+
+
+@presentation_router.get(
+    "/ollama/list-pulled-models", response_model=List[OllamaModelStatusResponse]
+)
 async def list_pulled_ollama_models():
     request_utils = RequestUtils(f"{route_prefix}/ollama/list-pulled-models")
     logging_service, log_metadata = await request_utils.initialize_logger()
@@ -358,7 +376,7 @@ async def list_pulled_ollama_models():
     )
 
 
-@presentation_router.get("/ollama/pull-model")
+@presentation_router.get("/ollama/pull-model", response_model=OllamaModelStatusResponse)
 async def pull_ollama_model(name: str, background_tasks: BackgroundTasks):
     request_utils = RequestUtils(f"{route_prefix}/ollama/pull-model")
     logging_service, log_metadata = await request_utils.initialize_logger()

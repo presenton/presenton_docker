@@ -1,7 +1,10 @@
 import asyncio
 import json
-from fastapi import BackgroundTasks
+from fastapi import BackgroundTasks, HTTPException
 from api.models import LogMetadata
+from api.routers.presentation.handlers.list_supported_ollama_models import (
+    SUPPORTED_OLLAMA_MODELS,
+)
 from api.routers.presentation.models import OllamaModelStatusResponse
 from api.services.instances import REDIS_SERVICE
 from api.services.logging import LoggingService
@@ -24,13 +27,24 @@ class PullOllamaModelHandler:
             extra=log_metadata.model_dump(),
         )
 
-        pulled_models = map(lambda model: model.model, ollama.list().models)
+        if self.name not in SUPPORTED_OLLAMA_MODELS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Model {self.name} is not supported",
+            )
+
+        pulled_models = ollama.list().models
+        filtered_models = list(
+            filter(lambda model: model.model == self.name, pulled_models)
+        )
 
         # If the model is already pulled, return the model
-        if self.name in pulled_models:
+        if filtered_models:
             return OllamaModelStatusResponse(
                 name=self.name,
+                size=filtered_models[0].size,
                 status="pulled",
+                downloaded=filtered_models[0].size,
                 done=True,
             )
 
