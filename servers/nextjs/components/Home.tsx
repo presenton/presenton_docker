@@ -13,6 +13,7 @@ import {
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { handleSaveLLMConfig, hasValidLLMConfig } from "@/utils/storeHelpers";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "./ui/select";
 
 interface ModelOption {
     value: string;
@@ -88,12 +89,27 @@ const PROVIDER_CONFIGS: Record<string, ProviderConfig> = {
             docsUrl: "https://aistudio.google.com/app/apikey",
         },
     },
-    "llama3.1:8b": {
+    ollama: {
         textModels: [
             {
                 value: "llama3.1:8b",
                 label: "Llama3.1:8b",
                 description: "Balanced model for most tasks",
+            },
+            {
+                value: "llama3.1:70b",
+                label: "Llama3.1:70b",
+                description: "Large model for complex tasks",
+            },
+            {
+                value: "llama3.1:14b",
+                label: "Llama3.1:14b",
+                description: "Large model for complex tasks",
+            },
+            {
+                value: "llama3.1:11b",
+                label: "Llama3.1:11b",
+                description: "Large model for complex tasks",
             },
         ],
         imageModels: [
@@ -120,18 +136,30 @@ export default function Home() {
     const router = useRouter();
     const config = useSelector((state: RootState) => state.userConfig);
     const [llmConfig, setLlmConfig] = useState(config.llm_config);
+    const [ollamaModels, setOllamaModels] = useState<{
+        label: string;
+        value: string;
+        description: string;
+    }[]>([]);
+    const [downloadingProgress, setDownloadingProgress] = useState<number>(0);
+
 
     const canChangeKeys = config.can_change_keys;
 
     const api_key_changed = (newApiKey: string) => {
         if (llmConfig.LLM === 'openai') {
             setLlmConfig({ ...llmConfig, OPENAI_API_KEY: newApiKey });
-        } else {
+        } else if (llmConfig.LLM === 'google') {
             setLlmConfig({ ...llmConfig, GOOGLE_API_KEY: newApiKey });
+        } else if (llmConfig.LLM === 'ollama') {
+            setLlmConfig({ ...llmConfig, PEXELS_API_KEY: newApiKey });
         }
     }
 
     const handleSaveConfig = async () => {
+        if (llmConfig.LLM === 'ollama') {
+            await pullOllamaModels();
+        }
         try {
             await handleSaveLLMConfig(llmConfig);
             toast({
@@ -148,6 +176,42 @@ export default function Home() {
         }
     };
 
+    const changeProvider = (provider: string) => {
+        setLlmConfig({ ...llmConfig, LLM: provider });
+        if (provider === 'ollama') {
+            fetchOllamaModels();
+        }
+    }
+
+    const pullOllamaModels = async () => {
+        const interval = setInterval(async () => {
+            try {
+                const response = await fetch(`/api/v1/ppt/ollama/pull-model?name=${llmConfig.OLLAMA_MODEL}`);
+                const data = await response.json();
+
+                if (!data.status) {
+                    setDownloadingProgress((data.downloaded || 0 / (data.size || 1)) * 100);
+                } else {
+                    clearInterval(interval);
+                }
+            } catch (error) {
+                console.error('Error fetching ollama models:', error);
+            }
+        }, 1000);
+        return () => clearInterval(interval);
+    }
+
+    const fetchOllamaModels = async () => {
+        try {
+            const response = await fetch('/api/v1/ppt/ollama/list-supported-models');
+            const data = await response.json();
+            setOllamaModels(data.models);
+        } catch (error) {
+            console.error('Error fetching ollama models:', error);
+        }
+    }
+
+
 
     useEffect(() => {
         if (!canChangeKeys) {
@@ -156,7 +220,7 @@ export default function Home() {
     }, []);
 
     if (!canChangeKeys) {
-        return <></>;
+        return null;
     }
 
     return (
@@ -183,7 +247,7 @@ export default function Home() {
                             {Object.keys(PROVIDER_CONFIGS).map((provider) => (
                                 <button
                                     key={provider}
-                                    onClick={() => setLlmConfig({ ...llmConfig, LLM: provider })}
+                                    onClick={() => changeProvider(provider)}
                                     className={`relative p-4 rounded-lg border-2 transition-all duration-200 ${llmConfig.LLM === provider
                                         ? "border-blue-500 bg-blue-50"
                                         : "border-gray-200 hover:border-blue-200 hover:bg-gray-50"
@@ -205,7 +269,7 @@ export default function Home() {
                     </div>
 
                     {/* API Key Input */}
-                    <div className="mb-8">
+                    {llmConfig.LLM !== 'ollama' && <div className="mb-8">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             {llmConfig.LLM!.charAt(0).toUpperCase() +
                                 llmConfig.LLM!.slice(1)}{" "}
@@ -224,7 +288,47 @@ export default function Home() {
                             <span className="block w-1 h-1 rounded-full bg-gray-400"></span>
                             Your API key will be stored locally and never shared
                         </p>
-                    </div>
+                    </div>}
+                    {
+                        llmConfig.LLM === 'ollama' && (<div>
+                            <div className="mb-8">
+
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Choose a supported model
+                                </label>
+                                <div className="w-full">
+                                    {ollamaModels.length > 0 ? <Select value={llmConfig.OLLAMA_MODEL} onValueChange={(value) => setLlmConfig({ ...llmConfig, OLLAMA_MODEL: value })}>
+                                        <SelectTrigger className="w-full px-4 py-6 outline-none border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors">
+                                            {llmConfig.OLLAMA_MODEL || 'Select a model'}
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {ollamaModels.map((model, index) => (
+                                                <SelectItem key={index} value={model.value} className="capitalize mt-1">
+                                                    <span className="text-base font-medium">{model.label}</span>
+                                                    <span className="text-sm text-gray-500 block mt-1">{model.description}</span>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select> : <div className="w-full h-10 bg-gray-200 rounded-lg"></div>}
+                                </div>
+                            </div>
+                            <div className="mb-8">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Pexels API Key (required for images)
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        required
+                                        placeholder="Enter your Pexels API key"
+                                        className="w-full px-4 py-2.5 outline-none border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                                        value={llmConfig.PEXELS_API_KEY || ''}
+                                        onChange={(e) => api_key_changed(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        </div>)
+                    }
 
                     {/* Model Information */}
                     <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-100">
@@ -235,7 +339,7 @@ export default function Home() {
                                     Selected Models
                                 </h3>
                                 <p className="text-sm text-blue-700">
-                                    Using {PROVIDER_CONFIGS[llmConfig.LLM!].textModels[0].label} for text
+                                    Using {llmConfig.LLM === 'ollama' ? llmConfig.OLLAMA_MODEL ?? '_____' : PROVIDER_CONFIGS[llmConfig.LLM!].textModels[0].label} for text
                                     generation and {PROVIDER_CONFIGS[llmConfig.LLM!].imageModels[0].label} for
                                     images
                                 </p>
@@ -292,6 +396,16 @@ export default function Home() {
                             </AccordionContent>
                         </AccordionItem>
                     </Accordion>
+
+                    {
+                        llmConfig.LLM === 'ollama' && (
+                            <div className="mb-8">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Downloading Model
+                                </label>
+                            </div>
+                        )
+                    }
 
                     {/* Save Button */}
                     <button
