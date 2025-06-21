@@ -1,7 +1,5 @@
 const path = require('path');
-const util = require('util');
 const { spawn } = require('child_process');
-const execAsync = util.promisify(require('child_process').exec);
 const fs = require('fs');
 
 const fastapiDir = path.join(__dirname, 'servers/fastapi');
@@ -10,7 +8,6 @@ const nextjsDir = path.join(__dirname, 'servers/nextjs');
 const isDev = process.env.NODE_ENV === 'development';
 const canChangeKeys = process.env.CAN_CHANGE_KEYS !== 'false';
 
-const localhost = '0.0.0.0';
 const fastapiPort = 8000;
 const nextjsPort = 3000;
 
@@ -35,6 +32,8 @@ const setupUserConfigFromEnv = () => {
     LLM: process.env.LLM || existingConfig.LLM,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY || existingConfig.OPENAI_API_KEY,
     GOOGLE_API_KEY: process.env.GOOGLE_API_KEY || existingConfig.GOOGLE_API_KEY,
+    OLLAMA_MODEL: process.env.OLLAMA_MODEL || existingConfig.OLLAMA_MODEL,
+    PEXELS_API_KEY: process.env.PEXELS_API_KEY || existingConfig.PEXELS_API_KEY,
   };
 
   fs.writeFileSync(userConfigPath, JSON.stringify(userConfig));
