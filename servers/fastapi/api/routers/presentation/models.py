@@ -4,6 +4,7 @@ from typing import List, Literal, Optional
 from fastapi import UploadFile
 from pydantic import BaseModel, Field
 
+from api.models import OllamaModelMetadata
 from ppt_config_generator.models import SlideMarkdownModel
 from ppt_generator.models.pptx_models import PptxPresentationModel
 from ppt_generator.models.query_and_prompt_models import (
@@ -175,4 +176,4 @@ class OllamaModelStatusResponse(BaseModel):
 
 
 class OllamaSupportedModelsResponse(BaseModel):
-    models: List[str]
+    models: List[OllamaModelMetadata]
