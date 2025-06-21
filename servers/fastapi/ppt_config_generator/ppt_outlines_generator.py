@@ -1,9 +1,5 @@
-import os
 from typing import Optional
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_ollama import ChatOllama
-from langchain_openai import ChatOpenAI
 
 from api.utils import get_large_model
 from ppt_config_generator.models import PresentationMarkdownModel
@@ -39,7 +35,7 @@ def get_prompt_template():
                 4. Develop comprehensive content using markdown structure:
                     * Use bullet points (- or *) for lists.
                     * Use **bold** for emphasis, *italic* for secondary emphasis, and `code` for technical terms.
-                5. Provide styling and formatting information for the presentation as notes.
+                5. Provide important points from prompt as notes.
                 
                 # Notes
                 - There must be exact number of slides as specified.

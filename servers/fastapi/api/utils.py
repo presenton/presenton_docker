@@ -18,7 +18,7 @@ from api.services.logging import LoggingService
 
 
 def is_ollama_selected() -> bool:
-    return os.getenv("LLM") != "openai" and os.getenv("LLM") != "google"
+    return os.getenv("LLM") == "ollama"
 
 
 def get_large_model():
@@ -28,7 +28,7 @@ def get_large_model():
     elif selected_llm == "google":
         return ChatGoogleGenerativeAI(model="gemini-2.0-flash")
     else:
-        return ChatOllama(model=selected_llm)
+        return ChatOllama(model=os.getenv("OLLAMA_MODEL"))
 
 
 def get_small_model():
@@ -38,7 +38,7 @@ def get_small_model():
     elif selected_llm == "google":
         return ChatGoogleGenerativeAI(model="gemini-2.0-flash")
     else:
-        return ChatOllama(model=selected_llm)
+        return ChatOllama(model=os.getenv("OLLAMA_MODEL"))
 
 
 def get_nano_model():
@@ -48,7 +48,7 @@ def get_nano_model():
     elif selected_llm == "google":
         return ChatGoogleGenerativeAI(model="gemini-2.0-flash")
     else:
-        return ChatOllama(model=selected_llm)
+        return ChatOllama(model=os.getenv("OLLAMA_MODEL"))
 
 
 def get_presentation_dir(presentation_id: str) -> str:
@@ -81,6 +81,8 @@ def get_user_config():
         LLM=existing_config.LLM or os.getenv("LLM"),
         OPENAI_API_KEY=existing_config.OPENAI_API_KEY or os.getenv("OPENAI_API_KEY"),
         GOOGLE_API_KEY=existing_config.GOOGLE_API_KEY or os.getenv("GOOGLE_API_KEY"),
+        OLLAMA_MODEL=existing_config.OLLAMA_MODEL or os.getenv("OLLAMA_MODEL"),
+        PEXELS_API_KEY=existing_config.PEXELS_API_KEY or os.getenv("PEXELS_API_KEY"),
     )
 
 
@@ -92,6 +94,10 @@ def update_env_with_user_config():
         os.environ["OPENAI_API_KEY"] = user_config.OPENAI_API_KEY
     if user_config.GOOGLE_API_KEY:
         os.environ["GOOGLE_API_KEY"] = user_config.GOOGLE_API_KEY
+    if user_config.OLLAMA_MODEL:
+        os.environ["OLLAMA_MODEL"] = user_config.OLLAMA_MODEL
+    if user_config.PEXELS_API_KEY:
+        os.environ["PEXELS_API_KEY"] = user_config.PEXELS_API_KEY
 
 
 def get_resource(relative_path):

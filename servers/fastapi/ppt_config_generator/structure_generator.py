@@ -35,7 +35,7 @@ prompt = ChatPromptTemplate.from_messages(
                 - Don't fall into patterns like always using type 2 and after type 1.
                 - Each presentation should have its own unique flow and rhythm.
                 - Do not select type **3** for any slide.
-                - Only select type **5** and **9** if outline has numbers to show graph.
+                - Do not select type **5** or **9** if outline does not have table.
 
                 **Go through notes and steps and make sure they are all followed. Rule breaks are strictly not allowed.**
             """,

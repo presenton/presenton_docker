@@ -31,11 +31,10 @@ from ppt_generator.models.other_models import (
 class LLMHeadingModel(BaseModel):
     heading: str = Field(
         description="List item heading to show in slide body",
-        max_length=35,
+        min_length=10,
     )
     description: str = Field(
         description="Description of list item in less than 20 words.",
-        max_length=180,
         min_length=100,
     )
 
@@ -71,8 +70,7 @@ class LLMSlideContentModel(BaseModel):
 
 class LLMType1Content(LLMSlideContentModel):
     body: str = Field(
-        description="Slide content summary in less than 15 words. This will be shown in text box in slide.",
-        max_length=230,
+        description="Slide content summary in less than 40 words.",
         min_length=150,
     )
     image_prompt: str = Field(
@@ -160,8 +158,7 @@ class LLMType4Content(LLMSlideContentModel):
 
 class LLMType5Content(LLMSlideContentModel):
     body: str = Field(
-        description="Slide content summary in less than 15 words. This will be shown in text box in slide.",
-        max_length=230,
+        description="Slide content summary in less than 40 words.",
         min_length=150,
     )
     graph: GraphModel = Field(description="Graph to show in slide")
@@ -176,7 +173,8 @@ class LLMType5Content(LLMSlideContentModel):
 
 class LLMType6Content(LLMSlideContentModel):
     description: str = Field(
-        description="Slide content summary in less than 15 words. This will be shown in text box in slide.",
+        description="Slide content summary in less than 30 words.",
+        min_length=100,
     )
     body: List[LLMHeadingModel] = Field(
         description="List items to show in slide's body",
@@ -225,8 +223,7 @@ class LLMType7Content(LLMSlideContentModel):
 
 class LLMType8Content(LLMSlideContentModel):
     description: str = Field(
-        description="Slide content summary in less than 15 words. This will be shown in text box in slide.",
-        max_length=230,
+        description="Slide content summary in less than 40 words.",
         min_length=150,
     )
     body: List[LLMHeadingModelWithImagePrompt] = Field(

@@ -1,11 +1,16 @@
-from api.models import LogMetadata
+from api.models import LogMetadata, OllamaModelMetadata
 from api.routers.presentation.models import OllamaSupportedModelsResponse
 from api.services.logging import LoggingService
 
 
-SUPPORTED_OLLAMA_MODELS = [
-    "llama3.1:8b",
-]
+SUPPORTED_OLLAMA_MODELS = {
+    "llama3.1:8b": OllamaModelMetadata(
+        label="Llama 3.1:8b",
+        value="llama3.1:8b",
+        description="This model does not support graph generation.",
+        supports_graph=False,
+    ),
+}
 
 
 class ListSupportedOllamaModelsHandler:
@@ -16,5 +21,5 @@ class ListSupportedOllamaModelsHandler:
         )
 
         return OllamaSupportedModelsResponse(
-            models=SUPPORTED_OLLAMA_MODELS,
+            models=SUPPORTED_OLLAMA_MODELS.values(),
         )

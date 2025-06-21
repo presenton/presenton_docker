@@ -170,6 +170,14 @@ class PresentationGenerateStreamHandler(FetchAssetsOnPresentationGenerationMixin
         ).to_string()
         n_slides = len(presentation_structure.slides)
         for i, slide_structure in enumerate(presentation_structure.slides):
+            # Informing about the start of the slide
+            # This is to make sure that the client renders slide n
+            # when it receives start chunk of slide n + 1
+            yield SSEResponse(
+                event="response",
+                data=json.dumps({"type": "chunk", "chunk": "{"}),
+            ).to_string()
+
             slide_content = await get_slide_content_from_type_and_outline(
                 slide_structure.type, self.outlines[i]
             )
@@ -179,11 +187,12 @@ class PresentationGenerateStreamHandler(FetchAssetsOnPresentationGenerationMixin
             )
             slide_models.append(slide_model)
             chunk = json.dumps(slide_model.model_dump(mode="json"))
+
             if i < n_slides - 1:
                 chunk += ","
             yield SSEResponse(
                 event="response",
-                data=json.dumps({"type": "chunk", "chunk": chunk}),
+                data=json.dumps({"type": "chunk", "chunk": chunk[1:]}),
             ).to_string()
         yield SSEResponse(
             event="response",

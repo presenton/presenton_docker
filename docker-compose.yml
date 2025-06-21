@@ -21,9 +21,8 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     ports:
-      - "9000:80" 
+      - "5000:80" 
       - "3000:3000"
-      # - "6379:6379"
       - "8000:8000"
     volumes:
       - .:/app
@@ -34,3 +33,6 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - PEXELS_API_KEY=${PEXELS_API_KEY}
+      - LANGSMITH_TRACING=${LANGSMITH_TRACING}
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
+      - LANGSMITH_PROJECT_ID=${LANGSMITH_PROJECT_ID}

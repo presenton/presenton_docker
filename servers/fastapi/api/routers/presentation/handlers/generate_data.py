@@ -47,6 +47,10 @@ class PresentationGenerateDataHandler:
                         }
                     )
                 )
+                for each in presentation_structure.slides:
+                    if each.type == 3:
+                        each.type = 6
+
                 presentation.structure = presentation_structure.model_dump(mode="json")
                 sql_session.commit()
                 sql_session.refresh(presentation)

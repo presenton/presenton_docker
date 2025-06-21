@@ -37,6 +37,7 @@ prompt_template_to_generate_slide_content = ChatPromptTemplate.from_messages(
             - Do not use markdown formatting in slide body.
             - **Icon query** must be a generic single word noun.
             - Example of **Image prompt**: deer in forest, moon in sky, etc.
+            - Try to make paragraphs as short as possible.
             {notes}
             """,
         ),
