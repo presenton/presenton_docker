@@ -22,7 +22,7 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     ports:
-      - "5000:80" 
+      - "9000:80" 
       - "3000:3000"
       - "8000:8000"
     volumes:

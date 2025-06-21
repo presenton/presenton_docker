@@ -140,8 +140,18 @@ export default function Home() {
         label: string;
         value: string;
         description: string;
+        size: string;
+
     }[]>([]);
-    const [downloadingProgress, setDownloadingProgress] = useState<number>(0);
+    const [downloadingModel, setDownloadingModel] = useState({
+        name: '',
+        size: null,
+        downloaded: null,
+        status: '',
+        done: false,
+    });
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
 
 
     const canChangeKeys = config.can_change_keys;
@@ -158,7 +168,23 @@ export default function Home() {
 
     const handleSaveConfig = async () => {
         if (llmConfig.LLM === 'ollama') {
-            await pullOllamaModels();
+            try {
+                setIsLoading(true);
+                await pullOllamaModels();
+                toast({
+                    title: 'Success',
+                    description: 'Model downloaded successfully',
+                });
+            } catch (error) {
+                console.error('Error pulling model:', error);
+                toast({
+                    title: 'Error',
+                    description: 'Failed to download model. Please try again.',
+                    variant: 'destructive',
+                });
+                setIsLoading(false);
+                return;
+            }
         }
         try {
             await handleSaveLLMConfig(llmConfig);
@@ -166,13 +192,16 @@ export default function Home() {
                 title: 'Success',
                 description: 'Configuration saved successfully',
             });
+            setIsLoading(false);
             router.push("/upload");
         } catch (error) {
             console.error('Error:', error);
             toast({
                 title: 'Error',
                 description: 'Failed to save configuration',
+                variant: 'destructive',
             });
+            setIsLoading(false);
         }
     };
 
@@ -183,22 +212,35 @@ export default function Home() {
         }
     }
 
-    const pullOllamaModels = async () => {
-        const interval = setInterval(async () => {
-            try {
-                const response = await fetch(`/api/v1/ppt/ollama/pull-model?name=${llmConfig.OLLAMA_MODEL}`);
-                const data = await response.json();
+    const pullOllamaModels = async (): Promise<void> => {
+        return new Promise((resolve, reject) => {
+            const interval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/api/v1/ppt/ollama/pull-model?name=${llmConfig.OLLAMA_MODEL}`);
+                    if (response.status === 200) {
 
-                if (!data.status) {
-                    setDownloadingProgress((data.downloaded || 0 / (data.size || 1)) * 100);
-                } else {
+                        const data = await response.json();
+
+                        if (data.done) {
+                            clearInterval(interval);
+                            setDownloadingModel(data);
+                            resolve();
+                        } else {
+                            setDownloadingModel(data);
+                        }
+                    } else {
+                        clearInterval(interval);
+                        reject(new Error('Model pulling failed'));
+                    }
+                } catch (error) {
+
+                    console.log('Error fetching ollama models:', error);
                     clearInterval(interval);
+                    reject(error);
                 }
-            } catch (error) {
-                console.error('Error fetching ollama models:', error);
-            }
-        }, 1000);
-        return () => clearInterval(interval);
+            }, 1000);
+
+        });
     }
 
     const fetchOllamaModels = async () => {
@@ -216,6 +258,9 @@ export default function Home() {
     useEffect(() => {
         if (!canChangeKeys) {
             router.push("/upload");
+        }
+        if (llmConfig.LLM === 'ollama') {
+            fetchOllamaModels();
         }
     }, []);
 
@@ -304,7 +349,7 @@ export default function Home() {
                                         <SelectContent>
                                             {ollamaModels.map((model, index) => (
                                                 <SelectItem key={index} value={model.value} className="capitalize mt-1">
-                                                    <span className="text-base font-medium">{model.label}</span>
+                                                    <span className="text-base font-medium">{model.label}  ({model.size})</span>
                                                     <span className="text-sm text-gray-500 block mt-1">{model.description}</span>
                                                 </SelectItem>
                                             ))}
@@ -397,23 +442,39 @@ export default function Home() {
                         </AccordionItem>
                     </Accordion>
 
-                    {
-                        llmConfig.LLM === 'ollama' && (
-                            <div className="mb-8">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Downloading Model
-                                </label>
-                            </div>
-                        )
-                    }
+
 
                     {/* Save Button */}
                     <button
                         onClick={handleSaveConfig}
-                        className="mt-8 w-full font-semibold  bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:ring-4 focus:ring-blue-200 transition-all duration-500"
+                        disabled={isLoading}
+                        className={`mt-8 w-full font-semibold py-3 px-4 rounded-lg transition-all duration-500 ${isLoading
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:ring-4 focus:ring-blue-200'
+                            } text-white`}
                     >
-                        Save Configuration
+                        {isLoading ? (
+                            <div className="flex items-center justify-center gap-2">
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                {llmConfig.LLM === 'ollama' && downloadingModel.downloaded || 0 > 0
+                                    ? `Downloading Model (${(((downloadingModel.downloaded || 0) / (downloadingModel.size || 1)) * 100).toFixed(0)}%)`
+                                    : 'Saving Configuration...'
+                                }
+                            </div>
+                        ) : (
+                            llmConfig.LLM === 'ollama' && !llmConfig.OLLAMA_MODEL
+                                ? 'Please Select a Model'
+                                : 'Save Configuration'
+                        )}
                     </button>
+
+                    {
+                        llmConfig.LLM === 'ollama' && downloadingModel.status && downloadingModel.status !== 'pulled' && (
+                            <div className="mt-3 text-sm text-center text-gray-600">
+                                {downloadingModel.status}
+                            </div>
+                        )
+                    }
                 </div>
             </main>
         </div>
