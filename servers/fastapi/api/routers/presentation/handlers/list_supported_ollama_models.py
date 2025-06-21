@@ -7,8 +7,23 @@ SUPPORTED_OLLAMA_MODELS = {
     "llama3.1:8b": OllamaModelMetadata(
         label="Llama 3.1:8b",
         value="llama3.1:8b",
-        description="This model does not support graph generation.",
+        description="❌ Graphs not supported.",
+        size="4.9GB",
         supports_graph=False,
+    ),
+    "llama3.1:70b": OllamaModelMetadata(
+        label="Llama 3.1:70b",
+        value="llama3.1:70b",
+        description="✅ Graphs supported.",
+        size="43GB",
+        supports_graph=True,
+    ),
+    "llama3.1:405b": OllamaModelMetadata(
+        label="Llama 3.1:405b",
+        value="llama3.1:405b",
+        description="✅ Graphs supported.",
+        size="243GB",
+        supports_graph=True,
     ),
 }
 

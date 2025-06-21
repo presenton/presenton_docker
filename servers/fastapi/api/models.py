@@ -70,4 +70,5 @@ class OllamaModelMetadata(BaseModel):
     label: str
     value: str
     description: str
+    size: str
     supports_graph: bool
