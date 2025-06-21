@@ -62,7 +62,7 @@ class PresentationGenerateStreamHandler(FetchAssetsOnPresentationGenerationMixin
         self.presentation_id = self.data.presentation_id
         self.theme = self.data.theme
         self.images = self.data.images
-        self.title = self.data.title
+        self.title = self.data.title or ""
         self.outlines = self.data.outlines
 
         return StreamingResponse(

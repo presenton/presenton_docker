@@ -6,17 +6,24 @@ import ollama
 from sqlmodel import SQLModel
 from contextlib import asynccontextmanager
 
+from api.routers.presentation.handlers.list_supported_ollama_models import (
+    SUPPORTED_OLLAMA_MODELS,
+)
 from api.routers.presentation.router import presentation_router
 from api.services.database import sql_engine
 from api.utils import is_ollama_selected, update_env_with_user_config
 
 can_change_keys = os.getenv("CAN_CHANGE_KEYS") != "false"
 
+# Ollama model download
 if not can_change_keys and is_ollama_selected():
     ollama_model = os.getenv("OLLAMA_MODEL")
     pexels_api_key = os.getenv("PEXELS_API_KEY")
     if not (ollama_model or pexels_api_key):
         raise Exception("OLLAMA_MODEL and PEXELS_API_KEY must be provided")
+
+    if ollama_model not in SUPPORTED_OLLAMA_MODELS:
+        raise Exception(f"Model {ollama_model} is not supported")
 
     print("-" * 50)
     print("Pulling model: ", ollama_model)

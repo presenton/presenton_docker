@@ -1,5 +1,5 @@
-from typing import List, Mapping, Self
-from pydantic import BaseModel, Field
+from typing import List, Mapping
+from pydantic import BaseModel
 
 from graph_processor.models import GraphModel
 from ppt_generator.models.content_type_models import (
@@ -29,14 +29,8 @@ from ppt_generator.models.other_models import (
 
 
 class LLMHeadingModel(BaseModel):
-    heading: str = Field(
-        description="List item heading to show in slide body",
-        min_length=10,
-    )
-    description: str = Field(
-        description="Description of list item in less than 20 words.",
-        min_length=100,
-    )
+    heading: str
+    description: str
 
     def to_content(self) -> HeadingModel:
         return HeadingModel(
@@ -46,36 +40,23 @@ class LLMHeadingModel(BaseModel):
 
 
 class LLMHeadingModelWithImagePrompt(LLMHeadingModel):
-    image_prompt: str = Field(
-        description="Prompt used to generate image for this item",
-    )
+    image_prompt: str
 
 
 class LLMHeadingModelWithIconQuery(LLMHeadingModel):
-    icon_query: str = Field(
-        description="Icon query to generate icon for this item",
-    )
+    icon_query: str
 
 
 class LLMSlideContentModel(BaseModel):
-    title: str = Field(description="Title of the slide")
-
-    @classmethod
-    def get_notes(cls) -> str:
-        return ""
+    title: str
 
     def to_content(self) -> SlideContentModel:
         raise NotImplementedError("to_content method not implemented")
 
 
 class LLMType1Content(LLMSlideContentModel):
-    body: str = Field(
-        description="Slide content summary in less than 40 words.",
-        min_length=150,
-    )
-    image_prompt: str = Field(
-        description="Prompt used to generate image for this slide.",
-    )
+    body: str
+    image_prompt: str
 
     def to_content(self) -> Type1Content:
         return Type1Content(
@@ -86,19 +67,7 @@ class LLMType1Content(LLMSlideContentModel):
 
 
 class LLMType2Content(LLMSlideContentModel):
-    body: List[LLMHeadingModel] = Field(
-        "List items to show in slide's body",
-        min_length=1,
-        max_length=4,
-    )
-
-    @classmethod
-    def get_notes(cls):
-        return """
-        - The **Body** should include **1 to 4 HeadingModels**.  
-        - Each **Heading** must consist of **1 to 3 words**.  
-        - Each item **Description** can be upto 10 words.
-        """
+    body: List[LLMHeadingModel]
 
     def to_content(self) -> Type2Content:
         return Type2Content(
@@ -108,22 +77,8 @@ class LLMType2Content(LLMSlideContentModel):
 
 
 class LLMType3Content(LLMSlideContentModel):
-    body: List[LLMHeadingModel] = Field(
-        "List items to show in slide's body",
-        min_length=3,
-        max_length=3,
-    )
-    image_prompt: str = Field(
-        description="Prompt used to generate image for this slide",
-    )
-
-    @classmethod
-    def get_notes(cls):
-        return """
-        - The **Body** should include **3 HeadingModels**.  
-        - Each **Heading** must consist of **1 to 3 words**.  
-        - Each item **Description** can be upto 10 words.
-        """
+    body: List[LLMHeadingModel]
+    image_prompt: str
 
     def to_content(self) -> Type3Content:
         return Type3Content(
@@ -134,19 +89,7 @@ class LLMType3Content(LLMSlideContentModel):
 
 
 class LLMType4Content(LLMSlideContentModel):
-    body: List[LLMHeadingModelWithImagePrompt] = Field(
-        "List items to show in slide's body",
-        min_length=1,
-        max_length=3,
-    )
-
-    @classmethod
-    def get_notes(cls):
-        return """
-        - The **Body** should include **1 to 3 HeadingModels**.  
-        - Each **Heading** must consist of **1 to 3 words**.  
-        - Each item **Description** can be upto 10 words.
-        """
+    body: List[LLMHeadingModelWithImagePrompt]
 
     def to_content(self) -> Type4Content:
         return Type4Content(
@@ -157,11 +100,8 @@ class LLMType4Content(LLMSlideContentModel):
 
 
 class LLMType5Content(LLMSlideContentModel):
-    body: str = Field(
-        description="Slide content summary in less than 40 words.",
-        min_length=150,
-    )
-    graph: GraphModel = Field(description="Graph to show in slide")
+    body: str
+    graph: GraphModel
 
     def to_content(self) -> Type5Content:
         return Type5Content(
@@ -172,23 +112,8 @@ class LLMType5Content(LLMSlideContentModel):
 
 
 class LLMType6Content(LLMSlideContentModel):
-    description: str = Field(
-        description="Slide content summary in less than 30 words.",
-        min_length=100,
-    )
-    body: List[LLMHeadingModel] = Field(
-        description="List items to show in slide's body",
-        min_length=1,
-        max_length=3,
-    )
-
-    @classmethod
-    def get_notes(cls):
-        return """
-        - The **Body** should include **1 to 3 HeadingModels**.  
-        - Each **Heading** must consist of **1 to 3 words**.  
-        - Each item **Description** can be upto 10 words.
-        """
+    description: str
+    body: List[LLMHeadingModel]
 
     def to_content(self) -> Type6Content:
         return Type6Content(
@@ -199,19 +124,7 @@ class LLMType6Content(LLMSlideContentModel):
 
 
 class LLMType7Content(LLMSlideContentModel):
-    body: List[LLMHeadingModelWithIconQuery] = Field(
-        description="List items to show in slide's body",
-        min_length=1,
-        max_length=4,
-    )
-
-    @classmethod
-    def get_notes(cls):
-        return """
-        - The **Body** should include **1 to 4 HeadingModels**.  
-        - Each **Heading** must consist of **1 to 3 words**.  
-        - Each item **Description** can be upto 10 words.
-        """
+    body: List[LLMHeadingModelWithIconQuery]
 
     def to_content(self) -> Type7Content:
         return Type7Content(
@@ -222,23 +135,8 @@ class LLMType7Content(LLMSlideContentModel):
 
 
 class LLMType8Content(LLMSlideContentModel):
-    description: str = Field(
-        description="Slide content summary in less than 40 words.",
-        min_length=150,
-    )
-    body: List[LLMHeadingModelWithImagePrompt] = Field(
-        "List items to show in slide's body",
-        min_length=1,
-        max_length=3,
-    )
-
-    @classmethod
-    def get_notes(cls):
-        return """
-        - The **Body** should include **1 to 3 HeadingModels**.  
-        - Each **Heading** must consist of **1 to 3 words**.  
-        - Each item **Description** can be upto 10 words.
-        """
+    description: str
+    body: List[LLMHeadingModelWithImagePrompt]
 
     def to_content(self) -> Type8Content:
         return Type8Content(
@@ -250,20 +148,8 @@ class LLMType8Content(LLMSlideContentModel):
 
 
 class LLMType9Content(LLMSlideContentModel):
-    body: List[LLMHeadingModel] = Field(
-        "List items to show in slide's body",
-        min_length=1,
-        max_length=3,
-    )
-    graph: GraphModel = Field(description="Graph to show in slide")
-
-    @classmethod
-    def get_notes(cls):
-        return """
-        - The **Body** should include **1 to 3 HeadingModels**.  
-        - Each **Heading** must consist of **1 to 3 words**.  
-        - Each item **Description** can be upto 10 words.
-        """
+    body: List[LLMHeadingModel]
+    graph: GraphModel
 
     def to_content(self) -> Type9Content:
         return Type9Content(

@@ -3,6 +3,9 @@ import uuid
 
 from fastapi import HTTPException
 from api.models import LogMetadata, SessionModel
+from api.routers.presentation.handlers.list_supported_ollama_models import (
+    SUPPORTED_OLLAMA_MODELS,
+)
 from api.routers.presentation.models import PresentationGenerateRequest
 from api.services.logging import LoggingService
 from api.sql_models import KeyValueSqlModel, PresentationSqlModel
@@ -47,9 +50,20 @@ class PresentationGenerateDataHandler:
                         }
                     )
                 )
+
+                supports_graph = True
+                if is_ollama_selected():
+                    model = SUPPORTED_OLLAMA_MODELS[os.getenv("OLLAMA_MODEL")]
+                    supports_graph = model.supports_graph
+
                 for each in presentation_structure.slides:
                     if each.type == 3:
                         each.type = 6
+                    if not supports_graph:
+                        if each.type == 5:
+                            each.type = 1
+                        elif each.type == 9:
+                            each.type = 6
 
                 presentation.structure = presentation_structure.model_dump(mode="json")
                 sql_session.commit()

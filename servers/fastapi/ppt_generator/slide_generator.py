@@ -1,17 +1,13 @@
 from typing import Optional
-import os
-from langchain_google_genai import ChatGoogleGenerativeAI
-from api.utils import get_small_model
+from api.utils import get_large_model, get_small_model
 from ppt_config_generator.models import SlideMarkdownModel
 from ppt_generator.fix_validation_errors import get_validated_response
-from ppt_generator.models.content_type_models import CONTENT_TYPE_MAPPING
 
-from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 
-from ppt_generator.models.llm_models import (
-    LLM_CONTENT_TYPE_MAPPING,
-    LLMSlideContentModel,
+from ppt_generator.models.llm_models import LLMSlideContentModel
+from ppt_generator.models.llm_models_with_validations import (
+    LLM_CONTENT_TYPE_WITH_VALIDATION_MAPPING,
 )
 from ppt_generator.models.other_models import SlideTypeModel
 from ppt_generator.models.slide_model import SlideModel
@@ -36,7 +32,7 @@ prompt_template_to_generate_slide_content = ChatPromptTemplate.from_messages(
             - Rephrase the slide body to make it flow naturally.
             - Do not use markdown formatting in slide body.
             - **Icon query** must be a generic single word noun.
-            - Example of **Image prompt**: deer in forest, moon in sky, etc.
+            - Example of **Image prompt**: deer in forest.
             - Try to make paragraphs as short as possible.
             {notes}
             """,
@@ -127,7 +123,7 @@ prompt_template_to_select_slide_type = ChatPromptTemplate.from_messages(
 async def get_slide_content_from_type_and_outline(
     slide_type: int, outline: SlideMarkdownModel
 ) -> LLMSlideContentModel:
-    content_type_model_type = LLM_CONTENT_TYPE_MAPPING[slide_type]
+    content_type_model_type = LLM_CONTENT_TYPE_WITH_VALIDATION_MAPPING[slide_type]
     model = get_small_model().with_structured_output(
         content_type_model_type.model_json_schema()
     )
@@ -151,18 +147,14 @@ async def get_edited_slide_content_model(
     theme: Optional[dict] = None,
     language: Optional[str] = None,
 ):
-    model = (
-        ChatOpenAI(model="gpt-4.1-mini")
-        if os.getenv("LLM") == "openai"
-        else ChatGoogleGenerativeAI(model="gemini-2.0-flash")
-    )
+    model = get_large_model()
 
-    content_type_model_type = CONTENT_TYPE_MAPPING[slide_type]
+    content_type_model_type = LLM_CONTENT_TYPE_WITH_VALIDATION_MAPPING[slide_type]
     chain = prompt_template_to_edit_slide_content | model.with_structured_output(
         content_type_model_type.model_json_schema()
     )
-    slide_data = slide.content.model_dump_json()
-    return await get_validated_response(
+    slide_data = slide.content.to_llm_content().model_dump_json()
+    edited_content = await get_validated_response(
         chain,
         {
             "prompt": prompt,
@@ -174,22 +166,20 @@ async def get_edited_slide_content_model(
         content_type_model_type,
     )
 
+    return edited_content.to_content()
+
 
 async def get_slide_type_from_prompt(
     prompt: str,
     slide: SlideModel,
 ) -> SlideTypeModel:
 
-    model = (
-        ChatOpenAI(model="gpt-4.1-mini")
-        if os.getenv("LLM") == "openai"
-        else ChatGoogleGenerativeAI(model="gemini-2.0-flash")
-    )
+    model = get_small_model()
 
     chain = prompt_template_to_select_slide_type | model.with_structured_output(
         SlideTypeModel.model_json_schema()
     )
-    slide_data = slide.content.model_dump_json()
+    slide_data = slide.content.to_llm_content().model_dump_json()
     return await get_validated_response(
         chain,
         {

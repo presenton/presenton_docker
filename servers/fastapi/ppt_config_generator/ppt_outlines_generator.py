@@ -38,13 +38,13 @@ def get_prompt_template():
                 5. Provide important points from prompt as notes.
                 
                 # Notes
-                - There must be exact number of slides as specified.
                 - Content must be generated for every slide.
                 - Images or Icons information provided in **Input** must be included in the **notes**.
                 - Notes should cleary define if it is for specific slide or for the presentation.
                 - Slide **body** should not contain slide **title**.
                 - Slide **title** should not contain "Slide 1", "Slide 2", etc.
                 - Slide **title** should not be in markdown format.
+                - There must be exact **Number of Slides** as specified.
                 """,
             ),
             (

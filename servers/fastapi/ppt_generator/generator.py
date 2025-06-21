@@ -1,16 +1,16 @@
-import os
 from typing import AsyncIterator
 
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_ollama import ChatOllama
-from langchain_openai import ChatOpenAI
 from langchain_core.messages import (
     HumanMessage,
     AIMessageChunk,
     AIMessage,
 )
+from api.utils import get_large_model
 from ppt_config_generator.models import PresentationMarkdownModel
-from ppt_generator.models.llm_models import LLMPresentationModel
+from ppt_generator.models.llm_models_with_validations import (
+    LLMPresentationModelWithValidation,
+)
+
 
 CREATE_PRESENTATION_PROMPT = """
     You're a professional presenter with years of experience in creating clear and engaging presentations. 
@@ -70,7 +70,7 @@ CREATE_PRESENTATION_PROMPT = """
     **Go through notes and steps and make sure they are all followed. Rule breaks are strictly not allowed.**
 """
 
-schema = LLMPresentationModel.model_json_schema()
+schema = LLMPresentationModelWithValidation.model_json_schema()
 
 system_prompt = f"""
 {CREATE_PRESENTATION_PROMPT}
@@ -91,12 +91,7 @@ def get_model_and_messages(
     presentation_outline: PresentationMarkdownModel,
 ):
     user_message = HumanMessage(presentation_outline.to_string())
-
-    model = (
-        ChatOpenAI(model="gpt-4.1")
-        if os.getenv("LLM") == "openai"
-        else ChatGoogleGenerativeAI(model="gemini-2.0-flash")
-    )
+    model = get_large_model()
 
     return model, system_prompt, user_message
 
@@ -114,11 +109,3 @@ async def generate_presentation(
 ) -> AIMessage:
     model, system_prompt, user_message = get_model_and_messages(presentation_outline)
     return await model.ainvoke([system_prompt, user_message])
-
-
-async def generate_presentation_ollama(
-    presentation_outline: PresentationMarkdownModel,
-) -> LLMPresentationModel:
-    user_message = HumanMessage(presentation_outline.to_string())
-    model = ChatOllama(model="llama3.1:8b").with_structured_output(LLMPresentationModel)
-    return await model.ainvoke([ollama_system_prompt, user_message])
